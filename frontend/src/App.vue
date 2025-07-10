@@ -19,84 +19,64 @@
     <v-navigation-drawer v-model="drawer" app>
       <v-list dense>
         <v-list-item to="/">
-          <v-list-item-icon>
+          <template v-slot:prepend>
             <v-icon>mdi-home</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>Home</v-list-item-title>
-          </v-list-item-content>
+          </template>
+          <v-list-item-title>Home</v-list-item-title>
         </v-list-item>
         <v-list-item to="/about">
-          <v-list-item-icon>
+          <template v-slot:prepend>
             <v-icon>mdi-information</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>About</v-list-item-title>
-          </v-list-item-content>
+          </template>
+          <v-list-item-title>About</v-list-item-title>
         </v-list-item>
         <v-list-item to="/rooms" v-if="isAuthenticated">
-          <v-list-item-icon>
+          <template v-slot:prepend>
             <v-icon>mdi-door</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>Room Management</v-list-item-title>
-          </v-list-item-content>
+          </template>
+          <v-list-item-title>Room Management</v-list-item-title>
         </v-list-item>
         <v-list-item to="/tenants" v-if="isAuthenticated">
-          <v-list-item-icon>
+          <template v-slot:prepend>
             <v-icon>mdi-account-group</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>Tenant Management</v-list-item-title>
-          </v-list-item-content>
+          </template>
+          <v-list-item-title>Tenant Management</v-list-item-title>
         </v-list-item>
         <v-list-item to="/contracts" v-if="isAuthenticated">
-          <v-list-item-icon>
+          <template v-slot:prepend>
             <v-icon>mdi-file-document</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>Contract Management</v-list-item-title>
-          </v-list-item-content>
+          </template>
+          <v-list-item-title>Contract Management</v-list-item-title>
         </v-list-item>
         <v-list-item to="/rent-payments" v-if="isAuthenticated">
-          <v-list-item-icon>
+          <template v-slot:prepend>
             <v-icon>mdi-cash-multiple</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>Rent Payment Management</v-list-item-title>
-          </v-list-item-content>
+          </template>
+          <v-list-item-title>Rent Payment Management</v-list-item-title>
         </v-list-item>
         <v-list-item to="/dashboard" v-if="isAuthenticated">
-          <v-list-item-icon>
+          <template v-slot:prepend>
             <v-icon>mdi-view-dashboard</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>Dashboard</v-list-item-title>
-          </v-list-item-content>
+          </template>
+          <v-list-item-title>Dashboard</v-list-item-title>
         </v-list-item>
         <v-list-item to="/login" v-if="!isAuthenticated">
-          <v-list-item-icon>
+          <template v-slot:prepend>
             <v-icon>mdi-login</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>Login</v-list-item-title>
-          </v-list-item-content>
+          </template>
+          <v-list-item-title>Login</v-list-item-title>
         </v-list-item>
         <v-list-item to="/register" v-if="!isAuthenticated">
-          <v-list-item-icon>
+          <template v-slot:prepend>
             <v-icon>mdi-account-plus</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>Register</v-list-item-title>
-          </v-list-item-content>
+          </template>
+          <v-list-item-title>Register</v-list-item-title>
         </v-list-item>
         <v-list-item @click="logout" v-if="isAuthenticated">
-          <v-list-item-icon>
+          <template v-slot:prepend>
             <v-icon>mdi-logout</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>Logout</v-list-item-title>
-          </v-list-item-content>
+          </template>
+          <v-list-item-title>Logout</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>

@@ -5,6 +5,12 @@ const app = express();
 const port = process.env.PORT || 3000;
 const authRoutes = require('./routes/authRoutes');
 const buildingRoutes = require('./routes/buildingRoutes');
+const roomRoutes = require('./routes/roomRoutes');
+const tenantRoutes = require('./routes/tenantRoutes');
+const contractRoutes = require('./routes/contractRoutes');
+const rentPaymentRoutes = require('./routes/rentPaymentRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
