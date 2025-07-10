@@ -467,6 +467,92 @@ MIT License
 - AI 기반 임차인 관리
 - 블록체인 기반 계약 관리
 
+🔧 추가 권장 사항
+1. 기술적 세부사항
+
+Node.js 버전 요구사항 명시 (예: Node.js 16.x 이상)
+데이터베이스 백업 전략 추가
+로그 로테이션 정책 명시
+세션 관리 정책 (JWT 만료 시간 등)
+
+2. 배포 및 운영 관련
+bash# 프로덕션 빌드
+npm run build
+
+# 프로덕션 서버 실행
+npm start
+
+# PM2를 사용한 프로세스 관리
+npm install -g pm2
+pm2 start ecosystem.config.js
+3. 데이터베이스 관련
+
+데이터 마이그레이션 전략 명시
+시드 데이터 생성 스크립트 추가
+백업 및 복원 절차 문서화
+
+4. 보안 강화사항
+
+CORS 설정 명시
+HTTPS 설정 가이드
+보안 헤더 설정 (helmet.js 사용)
+입력 데이터 검증 전략 (joi, express-validator 등)
+
+5. 모니터링 도구
+
+Winston 로깅 라이브러리 추가
+morgan HTTP 요청 로깅
+helmet 보안 헤더 설정
+
+6. 추가 환경 변수
+env# Server Configuration
+PORT=3000
+NODE_ENV=production
+
+# CORS Settings
+CORS_ORIGIN=http://localhost:8080
+
+# Rate Limiting
+RATE_LIMIT_WINDOW=15
+RATE_LIMIT_MAX=100
+
+# Session
+SESSION_SECRET=your-session-secret
+JWT_EXPIRES_IN=24h
+7. 스크립트 추가
+json{
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "build": "npm run build:frontend",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:seed": "sequelize-cli db:seed:all",
+    "db:reset": "sequelize-cli db:migrate:undo:all && npm run db:migrate && npm run db:seed"
+  }
+}
+8. 예외 처리 및 에러 관리
+
+글로벌 에러 핸들러 구현
+사용자 친화적 에러 메시지 정의
+API 에러 응답 표준화
+
+9. 성능 최적화 추가사항
+
+Redis 캐싱 전략 (선택사항)
+이미지 최적화 도구 (Sharp.js 등)
+CDN 연동 방안
+
+10. 문서화 개선
+
+API 문서화 (Swagger/OpenAPI 3.0)
+데이터베이스 ERD 다이어그램
+아키텍처 다이어그램
+
 ---
 
 **개발 시작일**: 2025년 7월
