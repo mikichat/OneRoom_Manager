@@ -13,6 +13,7 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const roomOptionRoutes = require('./routes/roomOptionRoutes');
+const seedRoutes = require('./routes/seedRoutes'); // 새로 추가
 
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -31,6 +32,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/room-options', roomOptionRoutes);
+app.use('/api', seedRoutes); // 새로 추가
 
 const setupCronJobs = require('./cronJobs');
 

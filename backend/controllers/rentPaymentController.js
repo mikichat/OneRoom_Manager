@@ -70,3 +70,20 @@ exports.deleteRentPayment = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.getOverdueRentPayments = async (req, res) => {
+  try {
+    const overduePayments = await RentPayment.findAll({
+      where: {
+        payment_status: '미납',
+        due_date: {
+          [db.Sequelize.Op.lt]: new Date() // 현재 날짜보다 이전인 due_date
+        }
+      },
+      include: [{ model: Contract, as: 'contract' }]
+    });
+    res.status(200).json(overduePayments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
