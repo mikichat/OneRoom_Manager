@@ -10,18 +10,42 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      RoomOption.belongsTo(models.Room, {
+        foreignKey: 'room_id',
+        as: 'room'
+      });
     }
   }
   RoomOption.init({
     room_id: DataTypes.INTEGER,
-    refrigerator: DataTypes.BOOLEAN,
-    washing_machine: DataTypes.BOOLEAN,
-    air_conditioner: DataTypes.BOOLEAN,
-    induction: DataTypes.BOOLEAN,
-    microwave: DataTypes.BOOLEAN,
-    tv: DataTypes.BOOLEAN,
-    wifi_router: DataTypes.BOOLEAN
+    refrigerator: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    washing_machine: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    air_conditioner: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    induction: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    microwave: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    tv: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    wifi_router: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    }
   }, {
     sequelize,
     modelName: 'RoomOption',

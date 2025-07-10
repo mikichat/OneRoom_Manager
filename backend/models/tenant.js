@@ -14,14 +14,34 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Tenant.init({
-    name: DataTypes.STRING,
-    phone: DataTypes.STRING,
-    email: DataTypes.STRING,
-    birth_first_six: DataTypes.STRING,
-    emergency_contact: DataTypes.STRING,
-    emergency_name: DataTypes.STRING,
-    is_student: DataTypes.BOOLEAN,
-    school_name: DataTypes.STRING
+    name: {
+      type: DataTypes.STRING(50),
+      allowNull: false
+    },
+    phone: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+      unique: true
+    },
+    email: {
+      type: DataTypes.STRING(100)
+    },
+    birth_first_six: {
+      type: DataTypes.STRING(6)
+    },
+    emergency_contact: {
+      type: DataTypes.STRING(20)
+    },
+    emergency_name: {
+      type: DataTypes.STRING(50)
+    },
+    is_student: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
+    },
+    school_name: {
+      type: DataTypes.STRING(100)
+    }
   }, {
     sequelize,
     modelName: 'Tenant',

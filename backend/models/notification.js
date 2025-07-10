@@ -10,16 +10,31 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      Notification.belongsTo(models.Contract, {
+        foreignKey: 'contract_id',
+        as: 'contract'
+      });
     }
   }
   Notification.init({
     contract_id: DataTypes.INTEGER,
-    type: DataTypes.ENUM,
-    title: DataTypes.STRING,
-    content: DataTypes.TEXT,
+    type: {
+      type: DataTypes.ENUM('SMS', '카카오톡', '이메일'),
+      allowNull: false
+    },
+    title: {
+      type: DataTypes.STRING(100),
+      allowNull: false
+    },
+    content: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
     sent_at: DataTypes.DATE,
-    status: DataTypes.ENUM
+    status: {
+      type: DataTypes.ENUM('대기', '발송완료', '실패'),
+      defaultValue: '대기'
+    }
   }, {
     sequelize,
     modelName: 'Notification',
