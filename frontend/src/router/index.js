@@ -58,6 +58,12 @@ const routes = [
     component: () => import('../views/ReportView.vue'),
     meta: { requiresAuth: true }
   },
+  {
+    path: '/room-options',
+    name: 'room-option-management',
+    component: () => import('../views/RoomOptionManagement.vue'),
+    meta: { requiresAuth: true, requiredRoles: ['admin'] }
+  },
 ];
 
 const router = createRouter({

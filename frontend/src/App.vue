@@ -6,11 +6,13 @@
       <v-spacer></v-spacer>
       <v-btn text to="/">Home</v-btn>
       <v-btn text to="/about">About</v-btn>
-      <v-btn text to="/rooms" v-if="isAuthenticated">Rooms</v-btn>
-      <v-btn text to="/tenants" v-if="isAuthenticated">Tenants</v-btn>
-      <v-btn text to="/contracts" v-if="isAuthenticated">Contracts</v-btn>
-      <v-btn text to="/rent-payments" v-if="isAuthenticated">Rent Payments</v-btn>
+      <v-btn text to="/rooms" v-if="isAdmin">Rooms</v-btn>
+      <v-btn text to="/tenants" v-if="isAdmin">Tenants</v-btn>
+      <v-btn text to="/contracts" v-if="isAdmin">Contracts</v-btn>
+      <v-btn text to="/rent-payments" v-if="isAdmin">Rent Payments</v-btn>
       <v-btn text to="/dashboard" v-if="isAuthenticated">Dashboard</v-btn>
+      <v-btn text to="/reports/monthly-income" v-if="isAuthenticated">Monthly Income Report</v-btn>
+      <v-btn text to="/room-options" v-if="isAdmin">Room Options</v-btn>
       <v-btn text to="/login" v-if="!isAuthenticated">Login</v-btn>
       <v-btn text to="/register" v-if="!isAuthenticated">Register</v-btn>
       <v-btn text @click="logout" v-if="isAuthenticated">Logout</v-btn>
@@ -30,25 +32,25 @@
           </template>
           <v-list-item-title>About</v-list-item-title>
         </v-list-item>
-        <v-list-item to="/rooms" v-if="isAuthenticated">
+        <v-list-item to="/rooms" v-if="isAdmin">
           <template v-slot:prepend>
             <v-icon>mdi-door</v-icon>
           </template>
           <v-list-item-title>Room Management</v-list-item-title>
         </v-list-item>
-        <v-list-item to="/tenants" v-if="isAuthenticated">
+        <v-list-item to="/tenants" v-if="isAdmin">
           <template v-slot:prepend>
             <v-icon>mdi-account-group</v-icon>
           </template>
           <v-list-item-title>Tenant Management</v-list-item-title>
         </v-list-item>
-        <v-list-item to="/contracts" v-if="isAuthenticated">
+        <v-list-item to="/contracts" v-if="isAdmin">
           <template v-slot:prepend>
             <v-icon>mdi-file-document</v-icon>
           </template>
           <v-list-item-title>Contract Management</v-list-item-title>
         </v-list-item>
-        <v-list-item to="/rent-payments" v-if="isAuthenticated">
+        <v-list-item to="/rent-payments" v-if="isAdmin">
           <template v-slot:prepend>
             <v-icon>mdi-cash-multiple</v-icon>
           </template>
@@ -59,6 +61,18 @@
             <v-icon>mdi-view-dashboard</v-icon>
           </template>
           <v-list-item-title>Dashboard</v-list-item-title>
+        </v-list-item>
+        <v-list-item to="/reports/monthly-income" v-if="isAuthenticated">
+          <template v-slot:prepend>
+            <v-icon>mdi-chart-bar</v-icon>
+          </template>
+          <v-list-item-title>Monthly Income Report</v-list-item-title>
+        </v-list-item>
+        <v-list-item to="/room-options" v-if="isAdmin">
+          <template v-slot:prepend>
+            <v-icon>mdi-cog</v-icon>
+          </template>
+          <v-list-item-title>Room Option Management</v-list-item-title>
         </v-list-item>
         <v-list-item to="/login" v-if="!isAuthenticated">
           <template v-slot:prepend>
@@ -104,6 +118,7 @@ const store = useStore();
 const router = useRouter();
 
 const isAuthenticated = computed(() => store.getters['auth/isAuthenticated']);
+const isAdmin = computed(() => store.state.auth.user && store.state.auth.user.role === 'admin');
 const snackbar = computed(() => store.state.snackbar);
 
 const logout = () => {
