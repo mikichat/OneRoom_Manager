@@ -6,14 +6,14 @@
 ## 🛠 기술 스택
 
 ### Backend
-- **Framework**: Node.js + Express.js 또는 Python + FastAPI
+- **Framework**: Node.js + Express.js
 - **Database**: SQLite3 (빠른 개발 및 배포)
-- **ORM**: Sequelize (Node.js) 또는 SQLAlchemy (Python)
+- **ORM**: Sequelize (Node.js)
 - **Authentication**: JWT 기반 인증
 
 ### Frontend
-- **Framework**: Vue.js 3 + Vuetify 또는 React + Material-UI
-- **State Management**: Vuex (Vue) 또는 Redux Toolkit (React)
+- **Framework**: Vue.js 3 + Vuetify
+- **State Management**: Vuex (Vue)
 - **Build Tool**: Vite
 
 ### 확장 서비스
