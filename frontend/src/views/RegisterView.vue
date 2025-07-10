@@ -42,7 +42,7 @@ const register = async () => {
     router.push('/login'); // Redirect to login after successful registration
   } catch (error) {
     console.error('Registration failed:', error);
-    alert('Registration failed. Please try again.');
+    store.dispatch('showSnackbar', { message: 'Registration failed. Please try again.', color: 'error' });
   }
 };
 </script>

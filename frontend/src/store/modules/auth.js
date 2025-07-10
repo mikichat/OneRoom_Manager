@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:3000/api/auth/'; // Backend API URL
+import apiClient from '../../api';
 
 const auth = {
   namespaced: true,
@@ -23,11 +21,11 @@ const auth = {
   },
   actions: {
     async register({ commit }, user) {
-      const response = await axios.post(API_URL + 'register', user);
+      const response = await apiClient.post('/auth/register', user);
       return response.data;
     },
     async login({ commit }, user) {
-      const response = await axios.post(API_URL + 'login', user);
+      const response = await apiClient.post('/auth/login', user);
       commit('SET_TOKEN', response.data.token);
       // Optionally decode token to get user info or fetch user info
       return response.data;

@@ -81,7 +81,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
+import apiClient from '../api';
 
 const tenants = ref([]);
 const dialog = ref(false);
@@ -122,7 +122,7 @@ const formTitle = computed(() => {
 
 const fetchTenants = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/api/tenants');
+    const response = await apiClient.get('/tenants');
     tenants.value = response.data;
   } catch (error) {
     console.error('Error fetching tenants:', error);
@@ -145,10 +145,10 @@ const saveItem = async () => {
   try {
     if (editedIndex.value > -1) {
       // Update item
-      await axios.put(`http://localhost:3000/api/tenants/${editedItem.value.id}`, editedItem.value);
+      await apiClient.put(`/tenants/${editedItem.value.id}`, editedItem.value);
     } else {
       // Create new item
-      await axios.post('http://localhost:3000/api/tenants', editedItem.value);
+      await apiClient.post('/tenants', editedItem.value);
     }
     closeDialog();
     fetchTenants(); // Refresh list
@@ -164,7 +164,7 @@ const editItem = (item) => {
 const deleteItem = async (item) => {
   if (confirm('Are you sure you want to delete this item?')) {
     try {
-      await axios.delete(`http://localhost:3000/api/tenants/${item.id}`);
+      await apiClient.delete(`/tenants/${item.id}`);
       fetchTenants(); // Refresh list
     } catch (error) {
       console.error('Error deleting tenant:', error);

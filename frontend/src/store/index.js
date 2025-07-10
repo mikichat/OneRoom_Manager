@@ -3,13 +3,30 @@ import auth from './modules/auth';
 
 export default createStore({
   state: {
-    // Your state here
+    snackbar: {
+      show: false,
+      message: '',
+      color: 'success',
+    },
   },
   mutations: {
-    // Your mutations here
+    SHOW_SNACKBAR(state, payload) {
+      state.snackbar.show = true;
+      state.snackbar.message = payload.message;
+      state.snackbar.color = payload.color || 'success';
+    },
+    HIDE_SNACKBAR(state) {
+      state.snackbar.show = false;
+      state.snackbar.message = '';
+    },
   },
   actions: {
-    // Your actions here
+    showSnackbar({ commit }, payload) {
+      commit('SHOW_SNACKBAR', payload);
+    },
+    hideSnackbar({ commit }) {
+      commit('HIDE_SNACKBAR');
+    },
   },
   modules: {
     auth,

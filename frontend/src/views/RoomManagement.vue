@@ -92,7 +92,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
+import apiClient from '../api';
 
 const rooms = ref([]);
 const dialog = ref(false);
@@ -138,7 +138,7 @@ const formTitle = computed(() => {
 
 const fetchRooms = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/api/rooms');
+    const response = await apiClient.get('/rooms');
     rooms.value = response.data;
   } catch (error) {
     console.error('Error fetching rooms:', error);
@@ -161,10 +161,10 @@ const saveItem = async () => {
   try {
     if (editedIndex.value > -1) {
       // Update item
-      await axios.put(`http://localhost:3000/api/rooms/${editedItem.value.id}`, editedItem.value);
+      await apiClient.put(`/rooms/${editedItem.value.id}`, editedItem.value);
     } else {
       // Create new item
-      await axios.post('http://localhost:3000/api/rooms', editedItem.value);
+      await apiClient.post('/rooms', editedItem.value);
     }
     closeDialog();
     fetchRooms(); // Refresh list
@@ -180,7 +180,7 @@ const editItem = (item) => {
 const deleteItem = async (item) => {
   if (confirm('Are you sure you want to delete this item?')) {
     try {
-      await axios.delete(`http://localhost:3000/api/rooms/${item.id}`);
+      await apiClient.delete(`/rooms/${item.id}`);
       fetchRooms(); // Refresh list
     } catch (error) {
       console.error('Error deleting room:', error);

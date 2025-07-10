@@ -87,6 +87,71 @@ exports.sendSms = async (req, res) => {
   }
 };
 
+exports.sendKakaoTalk = async (req, res) => {
+  try {
+    const { contract_id, content } = req.body;
+    const contract = await Contract.findByPk(contract_id);
+
+    if (!contract) {
+      return res.status(404).json({ message: 'Contract not found' });
+    }
+
+    // For simplicity, assuming tenant phone is available via contract
+    const tenant = await contract.getTenant(); // Assuming association is set up
+    if (!tenant || !tenant.phone) {
+      return res.status(400).json({ message: 'Tenant phone number not found for this contract' });
+    }
+
+    // KakaoTalk API integration (simplified example)
+    // In a real application, you would use the actual KakaoTalk Business Message API
+    const KAKAO_API_KEY = process.env.KAKAO_API_KEY;
+    const KAKAO_ADMIN_KEY = process.env.KAKAO_ADMIN_KEY;
+
+    // Example KakaoTalk API call (replace with actual API endpoint and payload)
+    const kakaoResponse = await axios.post(
+      'https://kapi.kakao.com/v2/api/talk/memo/default/send', // Example endpoint
+      {
+        template_object: {
+          object_type: 'text',
+          text: content,
+          link: {
+            web_url: 'https://developers.kakao.com',
+            mobile_web_url: 'https://developers.kakao.com',
+          },
+        },
+      },
+      {
+        headers: {
+          'Authorization': `KakaoAK ${KAKAO_ADMIN_KEY}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
+
+    await Notification.create({
+      contract_id,
+      type: '카카오톡',
+      title: '카카오톡 알림 발송',
+      content,
+      sent_at: new Date(),
+      status: '발송완료'
+    });
+
+    res.status(200).json({ message: 'KakaoTalk message sent successfully', data: kakaoResponse.data });
+  } catch (error) {
+    console.error('KakaoTalk send error:', error.response ? error.response.data : error.message);
+    await Notification.create({
+      contract_id: req.body.contract_id,
+      type: '카카오톡',
+      title: '카카오톡 알림 발송 실패',
+      content: req.body.content,
+      sent_at: new Date(),
+      status: '실패'
+    });
+    res.status(500).json({ error: error.response ? error.response.data : error.message });
+  }
+};
+
 exports.getAllNotifications = async (req, res) => {
   try {
     const notifications = await Notification.findAll({

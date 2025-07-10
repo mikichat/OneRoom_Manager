@@ -86,7 +86,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
+import apiClient from '../api';
 
 const rentPayments = ref([]);
 const dialog = ref(false);
@@ -126,7 +126,7 @@ const formTitle = computed(() => {
 
 const fetchRentPayments = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/api/rent-payments');
+    const response = await apiClient.get('/rent-payments');
     rentPayments.value = response.data;
   } catch (error) {
     console.error('Error fetching rent payments:', error);
@@ -149,10 +149,10 @@ const saveItem = async () => {
   try {
     if (editedIndex.value > -1) {
       // Update item
-      await axios.put(`http://localhost:3000/api/rent-payments/${editedItem.value.id}`, editedItem.value);
+      await apiClient.put(`/rent-payments/${editedItem.value.id}`, editedItem.value);
     } else {
       // Create new item
-      await axios.post('http://localhost:3000/api/rent-payments', editedItem.value);
+      await apiClient.post('/rent-payments', editedItem.value);
     }
     closeDialog();
     fetchRentPayments(); // Refresh list
@@ -168,7 +168,7 @@ const editItem = (item) => {
 const deleteItem = async (item) => {
   if (confirm('Are you sure you want to delete this item?')) {
     try {
-      await axios.delete(`http://localhost:3000/api/rent-payments/${item.id}`);
+      await apiClient.delete(`/rent-payments/${item.id}`);
       fetchRentPayments(); // Refresh list
     } catch (error) {
       console.error('Error deleting rent payment:', error);

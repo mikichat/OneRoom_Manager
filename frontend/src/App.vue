@@ -10,6 +10,7 @@
       <v-btn text to="/tenants" v-if="isAuthenticated">Tenants</v-btn>
       <v-btn text to="/contracts" v-if="isAuthenticated">Contracts</v-btn>
       <v-btn text to="/rent-payments" v-if="isAuthenticated">Rent Payments</v-btn>
+      <v-btn text to="/dashboard" v-if="isAuthenticated">Dashboard</v-btn>
       <v-btn text to="/login" v-if="!isAuthenticated">Login</v-btn>
       <v-btn text to="/register" v-if="!isAuthenticated">Register</v-btn>
       <v-btn text @click="logout" v-if="isAuthenticated">Logout</v-btn>
@@ -65,6 +66,14 @@
             <v-list-item-title>Rent Payment Management</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item to="/dashboard" v-if="isAuthenticated">
+          <v-list-item-icon>
+            <v-icon>mdi-view-dashboard</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title>Dashboard</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-list-item to="/login" v-if="!isAuthenticated">
           <v-list-item-icon>
             <v-icon>mdi-login</v-icon>
@@ -95,6 +104,13 @@
     <v-main>
       <router-view />
     </v-main>
+
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+      {{ snackbar.message }}
+      <template v-slot:actions>
+        <v-btn text @click="snackbar.show = false">Close</v-btn>
+      </template>
+    </v-snackbar>
   </v-app>
 </template>
 
@@ -108,6 +124,7 @@ const store = useStore();
 const router = useRouter();
 
 const isAuthenticated = computed(() => store.getters['auth/isAuthenticated']);
+const snackbar = computed(() => store.state.snackbar);
 
 const logout = () => {
   store.dispatch('auth/logout');

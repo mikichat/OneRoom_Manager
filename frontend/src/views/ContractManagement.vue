@@ -88,7 +88,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
+import apiClient from '../api';
 
 const contracts = ref([]);
 const dialog = ref(false);
@@ -133,7 +133,7 @@ const formTitle = computed(() => {
 
 const fetchContracts = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/api/contracts');
+    const response = await apiClient.get('/contracts');
     contracts.value = response.data;
   } catch (error) {
     console.error('Error fetching contracts:', error);
@@ -167,14 +167,14 @@ const saveItem = async () => {
 
     if (editedIndex.value > -1) {
       // Update item
-      await axios.put(`http://localhost:3000/api/contracts/${editedItem.value.id}`, formData, {
+      await apiClient.put(`/contracts/${editedItem.value.id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
     } else {
       // Create new item
-      await axios.post('http://localhost:3000/api/contracts', formData, {
+      await apiClient.post('/contracts', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -194,7 +194,7 @@ const editItem = (item) => {
 const deleteItem = async (item) => {
   if (confirm('Are you sure you want to delete this item?')) {
     try {
-      await axios.delete(`http://localhost:3000/api/contracts/${item.id}`);
+      await apiClient.delete(`/contracts/${item.id}`);
       fetchContracts(); // Refresh list
     } catch (error) {
       console.error('Error deleting contract:', error);

@@ -42,7 +42,7 @@ const login = async () => {
     router.push('/'); // Redirect to home after successful login
   } catch (error) {
     console.error('Login failed:', error);
-    alert('Login failed. Please check your credentials.');
+    store.dispatch('showSnackbar', { message: 'Login failed. Please check your credentials.', color: 'error' });
   }
 };
 </script>
