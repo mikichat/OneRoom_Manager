@@ -142,6 +142,18 @@ CREATE TABLE notifications (
 );
 ```
 
+#### 8. users (사용자 정보) - 역할 추가
+```sql
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'user') DEFAULT 'user' NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
 ## 🎯 핵심 기능
 
 ### 1. 방 관리
@@ -161,7 +173,8 @@ CREATE TABLE notifications (
 - ✅ 계약 연장 처리
 
 ### 3. 임차인 관리
-- ✅ 임차인 정보 등록 (이름, 전화번호 필수)
+- ✅ 임차인 정보 등록/수정/삭제
+- ✅ 임차인 검색 및 학생 여부 필터링 기능
 - ✅ 이메일, 주민번호 앞 6자리
 - ✅ 학생 정보 (학교명)
 - ✅ 비상연락처 관리
@@ -170,8 +183,9 @@ CREATE TABLE notifications (
 ### 4. 월세 관리
 - ✅ 월세 납부 내역 관리
 - ✅ 연체 관리
-- ✅ 납부 알림 자동 발송
+- ✅ 월세 납부 예정 자동 알림 (5일 전, 1일 전)
 - ✅ 월세 수납 현황 대시보드
+- ✅ 월별 수익 보고서
 
 ### 5. 알림 서비스
 - ✅ SMS 문자 발송
@@ -180,6 +194,11 @@ CREATE TABLE notifications (
 - ✅ 월세 납부 알림
 - ✅ 연체 알림
 
+### 6. 사용자 및 권한 관리
+- ✅ JWT 토큰 기반 인증 (로그인/회원가입)
+- ✅ 역할 기반 접근 제어 (Admin/User)
+- ✅ 관리자만 접근 가능한 기능 및 UI 요소 (방/세입자/계약/월세 관리 CRUD, 방 옵션 관리)
+
 ## 📱 주요 화면 구성
 
 ### 1. 대시보드
@@ -187,35 +206,44 @@ CREATE TABLE notifications (
 - 이번 달 수납 현황
 - 계약 만료 예정 리스트
 - 연체 현황
+- 월별 수입 통계 (지난 12개월)
+- 예정된 납부 내역
 
 ### 2. 방 관리
 - 방 목록 (필터링, 검색)
 - 방 등록/수정 폼
 - 방 상세 정보
-- 방 옵션 관리
 
-### 3. 계약 관리
+### 3. 방 옵션 관리
+- 방 옵션 목록 (Room ID로 검색)
+- 방 옵션 등록/수정 폼
+- 방 옵션 상세 정보
+
+### 4. 계약 관리
 - 계약 목록
 - 계약 등록/수정 폼
 - 계약 상세 정보
 - 계약서 이미지 뷰어
 
-### 4. 임차인 관리
-- 임차인 목록
+### 5. 임차인 관리
+- 임차인 목록 (이름, 전화번호, 이메일 검색, 학생 여부 필터링)
 - 임차인 등록/수정 폼
 - 임차인 상세 정보
 - 임차인 계약 히스토리
 
-### 5. 월세 관리
+### 6. 월세 관리
 - 월세 수납 현황
 - 연체 관리
 - 납부 내역 조회
 - 수납 통계
 
-### 6. 알림 관리
+### 7. 알림 관리
 - 알림 발송 이력
 - 알림 템플릿 관리
 - 자동 알림 설정
+
+### 8. 보고서
+- 월별 수익 보고서 (연도별 조회, 상세 납부 내역 포함)
 
 ## 🔧 구현 우선순위
 
@@ -240,52 +268,72 @@ CREATE TABLE notifications (
 
 ## 📋 API 설계
 
+### 사용자 인증 API
+```
+POST   /api/auth/register      - 사용자 등록 (기본 역할: user)
+POST   /api/auth/login         - 로그인 (JWT 토큰 및 사용자 역할 반환)
+```
+
 ### 방 관리 API
 ```
-GET    /api/rooms              - 방 목록 조회
-POST   /api/rooms              - 방 등록
-GET    /api/rooms/:id          - 방 상세 조회
-PUT    /api/rooms/:id          - 방 정보 수정
-DELETE /api/rooms/:id          - 방 삭제
+GET    /api/rooms              - 방 목록 조회 (인증 필요)
+POST   /api/rooms              - 방 등록 (Admin 권한 필요)
+GET    /api/rooms/:id          - 방 상세 조회 (인증 필요)
+PUT    /api/rooms/:id          - 방 정보 수정 (Admin 권한 필요)
+DELETE /api/rooms/:id          - 방 삭제 (Admin 권한 필요)
+```
+
+### 방 옵션 관리 API
+```
+GET    /api/room-options       - 방 옵션 목록 조회 (Room ID로 필터링 가능, 인증 필요)
+POST   /api/room-options       - 방 옵션 등록 (Admin 권한 필요)
+GET    /api/room-options/:id   - 방 옵션 상세 조회 (인증 필요)
+PUT    /api/room-options/:id   - 방 옵션 정보 수정 (Admin 권한 필요)
+DELETE /api/room-options/:id   - 방 옵션 삭제 (Admin 권한 필요)
 ```
 
 ### 계약 관리 API
 ```
-GET    /api/contracts          - 계약 목록 조회
-POST   /api/contracts          - 계약 등록
-GET    /api/contracts/:id      - 계약 상세 조회
-PUT    /api/contracts/:id      - 계약 정보 수정
-DELETE /api/contracts/:id      - 계약 해지
+GET    /api/contracts          - 계약 목록 조회 (인증 필요)
+POST   /api/contracts          - 계약 등록 (Admin 권한 필요)
+GET    /api/contracts/:id      - 계약 상세 조회 (인증 필요)
+PUT    /api/contracts/:id      - 계약 정보 수정 (Admin 권한 필요)
+DELETE /api/contracts/:id      - 계약 해지 (Admin 권한 필요)
 ```
 
 ### 임차인 관리 API
 ```
-GET    /api/tenants            - 임차인 목록 조회
-POST   /api/tenants            - 임차인 등록
-GET    /api/tenants/:id        - 임차인 상세 조회
-PUT    /api/tenants/:id        - 임차인 정보 수정
-DELETE /api/tenants/:id        - 임차인 삭제
+GET    /api/tenants            - 임차인 목록 조회 (검색 및 필터링 가능, 인증 필요)
+POST   /api/tenants            - 임차인 등록 (Admin 권한 필요)
+GET    /api/tenants/:id        - 임차인 상세 조회 (인증 필요)
+PUT    /api/tenants/:id        - 임차인 정보 수정 (Admin 권한 필요)
+DELETE /api/tenants/:id        - 임차인 삭제 (Admin 권한 필요)
 ```
 
 ### 대시보드 API
 ```
-GET    /api/dashboard/summary  - 대시보드 요약 정보 조회
+GET    /api/dashboard          - 대시보드 요약 정보 조회 (인증 필요)
 ```
 
 ### 월세 관리 API
 ```
-GET    /api/rent-payments      - 월세 납부 내역 목록 조회
-POST   /api/rent-payments      - 월세 납부 내역 등록
-GET    /api/rent-payments/:id  - 월세 납부 내역 상세 조회
-PUT    /api/rent-payments/:id  - 월세 납부 내역 수정
-DELETE /api/rent-payments/:id  - 월세 납부 내역 삭제
+GET    /api/rent-payments      - 월세 납부 내역 목록 조회 (인증 필요)
+POST   /api/rent-payments      - 월세 납부 내역 등록 (Admin 권한 필요)
+GET    /api/rent-payments/:id  - 월세 납부 내역 상세 조회 (인증 필요)
+PUT    /api/rent-payments/:id  - 월세 납부 내역 수정 (Admin 권한 필요)
+DELETE /api/rent-payments/:id  - 월세 납부 내역 삭제 (Admin 권한 필요)
 ```
 
 ### 알림 서비스 API
 ```
-POST   /api/notifications/sms  - SMS 발송
-POST   /api/notifications/kakao - 카카오톡 알림 발송
-GET    /api/notifications      - 알림 이력 조회
+POST   /api/notifications/sms  - SMS 발송 (Admin 권한 필요)
+POST   /api/notifications/kakao - 카카오톡 알림 발송 (Admin 권한 필요)
+GET    /api/notifications      - 알림 이력 조회 (인증 필요)
+```
+
+### 보고서 API
+```
+GET    /api/reports/monthly-income - 월별 수입 보고서 조회 (연도별 필터링 가능, 인증 필요)
 ```
 
 ## 🚀 설치 및 실행
@@ -370,7 +418,7 @@ chore: 빌드 과정 또는 보조 기능 수정
 
 ### 접근 제어
 - JWT 토큰 기반 인증
-- 역할 기반 접근 제어
+- 역할 기반 접근 제어 (Admin/User)
 - API rate limiting
 
 ## 🧪 테스트 계획
