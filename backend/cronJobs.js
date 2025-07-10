@@ -19,7 +19,7 @@ const setupCronJobs = () => {
           },
           contract_status: '활성'
         },
-        include: [Room, Tenant]
+        include: [{ model: Room, as: 'room' }, { model: Tenant, as: 'tenant' }]
       });
 
       for (const contract of expiringContracts) {
@@ -45,7 +45,7 @@ const setupCronJobs = () => {
             [Op.lt]: new Date()
           }
         },
-        include: [{ model: Contract, include: [Room, Tenant] }]
+        include: [{ model: Contract, include: [{ model: Room, as: 'room' }, { model: Tenant, as: 'tenant' }] }]
       });
 
       for (const payment of overduePayments) {
