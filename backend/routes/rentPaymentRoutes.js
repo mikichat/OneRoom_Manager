@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const rentPaymentController = require('../controllers/rentPaymentController');
+const { protect, authorizeRoles } = require('../middlewares/authMiddleware');
 
-router.post('/', rentPaymentController.createRentPayment);
-router.get('/', rentPaymentController.getAllRentPayments);
-router.get('/:id', rentPaymentController.getRentPaymentById);
-router.put('/:id', rentPaymentController.updateRentPayment);
-router.delete('/:id', rentPaymentController.deleteRentPayment);
+router.post('/', protect, authorizeRoles('admin'), rentPaymentController.createRentPayment);
+router.get('/', protect, rentPaymentController.getAllRentPayments);
+router.get('/:id', protect, rentPaymentController.getRentPaymentById);
+router.put('/:id', protect, authorizeRoles('admin'), rentPaymentController.updateRentPayment);
+router.delete('/:id', protect, authorizeRoles('admin'), rentPaymentController.deleteRentPayment);
 
 module.exports = router;

@@ -11,6 +11,7 @@ const contractRoutes = require('./routes/contractRoutes');
 const rentPaymentRoutes = require('./routes/rentPaymentRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -27,6 +28,7 @@ app.use('/api/contracts', contractRoutes);
 app.use('/api/rent-payments', rentPaymentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/reports', reportRoutes);
 
 const setupCronJobs = require('./cronJobs');
 

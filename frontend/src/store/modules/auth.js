@@ -27,7 +27,7 @@ const auth = {
     async login({ commit }, user) {
       const response = await apiClient.post('/auth/login', user);
       commit('SET_TOKEN', response.data.token);
-      // Optionally decode token to get user info or fetch user info
+      commit('SET_USER', response.data.user); // 사용자 정보 저장
       return response.data;
     },
     logout({ commit }) {

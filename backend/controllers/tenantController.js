@@ -1,4 +1,5 @@
-const { Tenant } = require('../models');
+const { Tenant, Sequelize } = require('../models');
+const { Op } = Sequelize;
 
 exports.createTenant = async (req, res) => {
   try {
@@ -11,7 +12,22 @@ exports.createTenant = async (req, res) => {
 
 exports.getAllTenants = async (req, res) => {
   try {
-    const tenants = await Tenant.findAll();
+    const { search, is_student } = req.query;
+    const where = {};
+
+    if (search) {
+      where[Op.or] = [
+        { name: { [Op.like]: `%${search}%` } },
+        { phone: { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } },
+      ];
+    }
+
+    if (is_student !== undefined) {
+      where.is_student = (is_student === 'true');
+    }
+
+    const tenants = await Tenant.findAll({ where });
     res.status(200).json(tenants);
   } catch (error) {
     res.status(500).json({ error: error.message });

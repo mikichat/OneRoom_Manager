@@ -9,7 +9,7 @@
           <v-card-title>Rent Payments</v-card-title>
           <v-card-text>
             <v-data-table
-              :headers="headers"
+              :headers="filteredHeaders"
               :items="rentPayments"
               :items-per-page="5"
               class="elevation-1"
@@ -19,12 +19,12 @@
                   <v-toolbar-title>Rent Payment List</v-toolbar-title>
                   <v-divider class="mx-4" inset vertical></v-divider>
                   <v-spacer></v-spacer>
-                  <v-btn color="primary" dark class="mb-2" @click="openDialog()">New Rent Payment</v-btn>
+                  <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">New Rent Payment</v-btn>
                 </v-toolbar>
               </template>
               <template v-slot:item.actions="{ item }">
-                <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
-                <v-icon small @click="deleteItem(item)">mdi-delete</v-icon>
+                <v-icon v-if="isAdmin" small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
+                <v-icon v-if="isAdmin" small @click="deleteItem(item)">mdi-delete</v-icon>
               </template>
             </v-data-table>
           </v-card-text>
@@ -86,7 +86,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useStore } from 'vuex'; // useStore import 추가
 import apiClient from '../api';
+
+const store = useStore(); // store 초기화
 
 const rentPayments = ref([]);
 const dialog = ref(false);
@@ -110,15 +113,26 @@ const defaultItem = {
   memo: '',
 };
 
-const headers = [
+const baseHeaders = [
   { title: 'Contract ID', key: 'contract_id' },
   { title: 'Payment Date', key: 'payment_date' },
   { title: 'Amount', key: 'amount' },
   { title: 'Payment Method', key: 'payment_method' },
   { title: 'Payment Status', key: 'payment_status' },
   { title: 'Due Date', key: 'due_date' },
-  { title: 'Actions', key: 'actions', sortable: false },
 ];
+
+const filteredHeaders = computed(() => {
+  if (isAdmin.value) {
+    return [...baseHeaders, { title: 'Actions', key: 'actions', sortable: false }];
+  } else {
+    return baseHeaders;
+  }
+});
+
+const isAdmin = computed(() => {
+  return store.state.auth.user && store.state.auth.user.role === 'admin';
+});
 
 const formTitle = computed(() => {
   return editedIndex.value === -1 ? 'New Rent Payment' : 'Edit Rent Payment';

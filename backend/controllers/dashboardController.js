@@ -1,4 +1,4 @@
-const { Room, Contract, RentPayment, Sequelize } = require('../models');
+const { Room, Contract, RentPayment, Sequelize, Tenant } = require('../models');
 const { Op } = Sequelize;
 
 exports.getDashboardSummary = async (req, res) => {
@@ -50,13 +50,48 @@ exports.getDashboardSummary = async (req, res) => {
       include: [{ model: Contract, include: [Room, Tenant] }]
     });
 
+    // 예정된 납부 내역 (미납이면서 due_date가 오늘 이후인 경우)
+    const upcomingPayments = await RentPayment.findAll({
+      where: {
+        payment_status: '미납',
+        due_date: {
+          [Op.gte]: new Date()
+        }
+      },
+      include: [{ model: Contract, include: [Room, Tenant] }],
+      order: [['due_date', 'ASC']]
+    });
+
+    // 월별 수입 통계 (지난 12개월)
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+    twelveMonthsAgo.setDate(1);
+    twelveMonthsAgo.setHours(0, 0, 0, 0);
+
+    const monthlyIncome = await RentPayment.findAll({
+      attributes: [
+        [Sequelize.fn('strftime', '%Y-%m', Sequelize.col('payment_date')), 'month'],
+        [Sequelize.fn('SUM', Sequelize.col('amount')), 'total_amount']
+      ],
+      where: {
+        payment_status: '완료',
+        payment_date: {
+          [Op.gte]: twelveMonthsAgo
+        }
+      },
+      group: [Sequelize.fn('strftime', '%Y-%m', Sequelize.col('payment_date'))],
+      order: [[Sequelize.fn('strftime', '%Y-%m', Sequelize.col('payment_date')), 'ASC']]
+    });
+
     res.status(200).json({
       totalRooms,
       rentedRooms,
       availableRooms,
       paidThisMonth: paidThisMonth || 0,
       expiringContracts,
-      overduePayments
+      overduePayments,
+      upcomingPayments, // 추가된 부분
+      monthlyIncome     // 추가된 부분
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -66,6 +66,49 @@
           </v-card-text>
         </v-card>
       </v-col>
+
+      <v-col cols="12">
+        <v-card>
+          <v-card-title>Upcoming Payments</v-card-title>
+          <v-card-text>
+            <v-list dense>
+              <v-list-item v-for="payment in dashboardSummary.upcomingPayments" :key="payment.id">
+                <v-list-item-content>
+                  <v-list-item-title>{{ payment.contract.room.room_number }} - {{ payment.contract.tenant.name }}</v-list-item-title>
+                  <v-list-item-subtitle>Due: {{ new Date(payment.due_date).toLocaleDateString() }} - Amount: {{ payment.amount }}</v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item v-if="dashboardSummary.upcomingPayments && dashboardSummary.upcomingPayments.length === 0">
+                <v-list-item-content>
+                  <v-list-item-title>No upcoming payments.</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12">
+        <v-card>
+          <v-card-title>Monthly Income (Last 12 Months)</v-card-title>
+          <v-card-text>
+            <v-list dense>
+              <v-list-item v-for="monthData in dashboardSummary.monthlyIncome" :key="monthData.month">
+                <v-list-item-content>
+                  <v-list-item-title>{{ monthData.month }}: {{ monthData.total_amount }}</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item v-if="dashboardSummary.monthlyIncome && dashboardSummary.monthlyIncome.length === 0">
+                <v-list-item-content>
+                  <v-list-item-title>No monthly income data available.</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+            <!-- Chart will go here -->
+            <!-- <canvas ref="monthlyIncomeChart"></canvas> -->
+          </v-card-text>
+        </v-card>
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -81,6 +124,8 @@ const dashboardSummary = ref({
   paidThisMonth: 0,
   expiringContracts: [],
   overduePayments: [],
+  upcomingPayments: [], // 추가된 부분
+  monthlyIncome: [],     // 추가된 부분
 });
 
 const fetchDashboardSummary = async () => {
