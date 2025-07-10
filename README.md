@@ -19,7 +19,8 @@
 ### 확장 서비스
 - **SMS 서비스**: 네이버 클라우드 플랫폼 SENS 또는 KT SMS API
 - **카카오톡 알림**: 카카오 비즈니스 메시지 API
-- **파일 업로드**: Multer + 로컬 저장소 또는 AWS S3
+- **파일 업로드**: Multer 미들웨어 활용 (로컬 저장소 또는 AWS S3 연동 가능)
+- **자동화된 작업**: `cronJobs.js`를 이용한 정기적인 작업 (예: 월세 납부 알림)
 
 ## 📊 데이터베이스 설계
 
@@ -264,6 +265,20 @@ POST   /api/tenants            - 임차인 등록
 GET    /api/tenants/:id        - 임차인 상세 조회
 PUT    /api/tenants/:id        - 임차인 정보 수정
 DELETE /api/tenants/:id        - 임차인 삭제
+```
+
+### 대시보드 API
+```
+GET    /api/dashboard/summary  - 대시보드 요약 정보 조회
+```
+
+### 월세 관리 API
+```
+GET    /api/rent-payments      - 월세 납부 내역 목록 조회
+POST   /api/rent-payments      - 월세 납부 내역 등록
+GET    /api/rent-payments/:id  - 월세 납부 내역 상세 조회
+PUT    /api/rent-payments/:id  - 월세 납부 내역 수정
+DELETE /api/rent-payments/:id  - 월세 납부 내역 삭제
 ```
 
 ### 알림 서비스 API
