@@ -1,5 +1,5 @@
-const { RentPayment, Contract } = require('../models');
-const { Sequelize } = require('../models'); // Sequelize 객체를 가져옴
+const { RentPayment, Contract, Room, Tenant, sequelize } = require('../models'); // Room, Tenant, sequelize 객체를 추가로 가져옴
+const { Sequelize } = require('sequelize'); // Sequelize 객체를 가져옴
 const ExcelJS = require('exceljs'); // ExcelJS import
 const path = require('path');
 
@@ -16,7 +16,14 @@ exports.createRentPayment = async (req, res) => {
 exports.getAllRentPayments = async (req, res) => {
   try {
     const rentPayments = await RentPayment.findAll({
-      include: [{ model: Contract, as: 'contract' }]
+      include: [{
+        model: Contract,
+        as: 'contract',
+        include: [
+          { model: Room, as: 'room' },
+          { model: Tenant, as: 'tenant' }
+        ]
+      }]
     });
     res.status(200).json(rentPayments);
   } catch (error) {
@@ -29,7 +36,14 @@ exports.getRentPaymentById = async (req, res) => {
   try {
     const { id } = req.params;
     const rentPayment = await RentPayment.findByPk(id, {
-      include: [{ model: Contract, as: 'contract' }]
+      include: [{
+        model: Contract,
+        as: 'contract',
+        include: [
+          { model: Room, as: 'room' },
+          { model: Tenant, as: 'tenant' }
+        ]
+      }]
     });
     if (rentPayment) {
       res.status(200).json(rentPayment);
@@ -50,7 +64,14 @@ exports.updateRentPayment = async (req, res) => {
     });
     if (updated) {
       const updatedRentPayment = await RentPayment.findByPk(id, {
-        include: [{ model: Contract, as: 'contract' }]
+        include: [{
+          model: Contract,
+          as: 'contract',
+          include: [
+            { model: Room, as: 'room' },
+            { model: Tenant, as: 'tenant' }
+          ]
+        }]
       });
       res.status(200).json(updatedRentPayment);
     } else {
@@ -88,7 +109,14 @@ exports.getOverdueRentPayments = async (req, res) => {
           [Sequelize.Op.lt]: new Date()
         }
       },
-      include: [{ model: Contract, as: 'contract' }]
+      include: [{
+        model: Contract,
+        as: 'contract',
+        include: [
+          { model: Room, as: 'room' },
+          { model: Tenant, as: 'tenant' }
+        ]
+      }]
     });
     res.status(200).json(overduePayments);
   } catch (error) {
@@ -100,7 +128,14 @@ exports.getOverdueRentPayments = async (req, res) => {
 exports.downloadRentPaymentsExcel = async (req, res) => {
   try {
     const rentPayments = await RentPayment.findAll({
-      include: [{ model: Contract, as: 'contract' }]
+      include: [{
+        model: Contract,
+        as: 'contract',
+        include: [
+          { model: Room, as: 'room' },
+          { model: Tenant, as: 'tenant' }
+        ]
+      }]
     });
 
     const workbook = new ExcelJS.Workbook();
