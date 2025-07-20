@@ -5,11 +5,11 @@ module.exports = {
     // Users
     await queryInterface.bulkInsert('users', [{
       username: 'admin',
-      password: '$2b$10$YqEuNKnV.XhPVfQ3ckusLOGYrhvl3C4iIxY5xT3MD1zCdctCMSEWS', // 실제 환경에서는 bcrypt 등으로 해싱된 비밀번호 사용
+      password: '$2b$10$YqEuNKnV.XhPVfQ3ckusLOGYrhvl3C4iIxY5xT3MD1zCdctCMSEWS', // bcrypt로 해싱된 비밀번호
       role: 'admin'
     }, {
       username: 'user1',
-      password: '$2b$10$YqEuNKnV.XhPVfQ3ckusLOGYrhvl3C4iIxY5xT3MD1zCdctCMSEWS', // 실제 환경에서는 bcrypt 등으로 해싱된 비밀번호 사용
+      password: '$2b$10$YqEuNKnV.XhPVfQ3ckusLOGYrhvl3C4iIxY5xT3MD1zCdctCMSEWS', // bcrypt로 해싱된 비밀번호
       role: 'user'
     }], {});
 

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const cors = require('cors'); // cors 모듈 추가
 const app = express();
 const port = process.env.PORT || 3000;
 const authRoutes = require('./routes/authRoutes');
@@ -16,6 +17,7 @@ const roomOptionRoutes = require('./routes/roomOptionRoutes');
 const seedRoutes = require('./routes/seedRoutes'); // 새로 추가
 
 app.use(express.json());
+app.use(cors()); // CORS 미들웨어 추가
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/', (req, res) => {

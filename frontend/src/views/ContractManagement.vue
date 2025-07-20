@@ -41,28 +41,40 @@
         <v-card-text>
           <v-container>
             <v-row>
-              <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.room_id" label="Room ID"></v-text-field>
+              <v-col cols="12" sm="6">
+                <v-autocomplete
+                  v-model="editedItem.room_id"
+                  :items="rooms"
+                  item-title="room_number"
+                  item-value="id"
+                  label="Select Room"
+                ></v-autocomplete>
               </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.tenant_id" label="Tenant ID"></v-text-field>
+              <v-col cols="12" sm="6">
+                <v-autocomplete
+                  v-model="editedItem.tenant_id"
+                  :items="tenants"
+                  item-title="name"
+                  item-value="id"
+                  label="Select Tenant"
+                ></v-autocomplete>
               </v-col>
-              <v-col cols="12" sm="6" md="4">
+              <v-col cols="12" sm="6">
                 <v-text-field v-model="editedItem.contract_start_date" label="Contract Start Date" type="date"></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" md="4">
+              <v-col cols="12" sm="6">
                 <v-text-field v-model="editedItem.contract_end_date" label="Contract End Date" type="date"></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.monthly_rent" label="Monthly Rent"></v-text-field>
+              <v-col cols="12" sm="6">
+                <v-text-field v-model="editedItem.monthly_rent" label="Monthly Rent" type="number"></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.deposit" label="Deposit"></v-text-field>
+              <v-col cols="12" sm="6">
+                <v-text-field v-model="editedItem.deposit" label="Deposit" type="number"></v-text-field>
               </v-col>
               <v-col cols="12">
-                <v-file-input v-model="contractImage" label="Contract Image" prepend-icon="mdi-paperclip"></v-file-input>
+                <v-file-input v-model="contractImage" label="Contract Image" prepend-icon="mdi-paperclip" clearable></v-file-input>
               </v-col>
-              <v-col cols="12" sm="6" md="4">
+              <v-col cols="12" sm="6">
                 <v-select
                   v-model="editedItem.contract_status"
                   :items="['활성', '만료', '해지']"
@@ -88,41 +100,44 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex'; // useStore import 추가
+import { useStore } from 'vuex';
 import apiClient from '../api';
 
-const store = useStore(); // store 초기화
+const store = useStore();
 
 const contracts = ref([]);
+const rooms = ref([]);
+const tenants = ref([]);
 const dialog = ref(false);
 const editedIndex = ref(-1);
 const contractImage = ref(null);
+
 const editedItem = ref({
-  room_id: '',
-  tenant_id: '',
+  room_id: null,
+  tenant_id: null,
   contract_start_date: '',
   contract_end_date: '',
   monthly_rent: '',
   deposit: '',
   contract_image_path: '',
-  contract_status: '',
+  contract_status: '활성',
   special_terms: '',
 });
 const defaultItem = {
-  room_id: '',
-  tenant_id: '',
+  room_id: null,
+  tenant_id: null,
   contract_start_date: '',
   contract_end_date: '',
   monthly_rent: '',
   deposit: '',
   contract_image_path: '',
-  contract_status: '',
+  contract_status: '활성',
   special_terms: '',
 };
 
 const baseHeaders = [
-  { title: 'Room ID', key: 'room_id' },
-  { title: 'Tenant ID', key: 'tenant_id' },
+  { title: 'Room', key: 'room.room_number' },
+  { title: 'Tenant', key: 'tenant.name' },
   { title: 'Start Date', key: 'contract_start_date' },
   { title: 'End Date', key: 'contract_end_date' },
   { title: 'Monthly Rent', key: 'monthly_rent' },
@@ -154,6 +169,25 @@ const fetchContracts = async () => {
   }
 };
 
+const fetchRooms = async () => {
+  try {
+    const response = await apiClient.get('/rooms');
+    rooms.value = response.data;
+  } catch (error) {
+    console.error('Error fetching rooms:', error);
+  }
+};
+
+const fetchTenants = async () => {
+  try {
+    const response = await apiClient.get('/tenants');
+    tenants.value = response.data;
+  } catch (error) {
+    console.error('Error fetching tenants:', error);
+  }
+};
+
+
 const openDialog = (item) => {
   editedIndex.value = contracts.value.indexOf(item);
   editedItem.value = item ? { ...item } : { ...defaultItem };
@@ -170,12 +204,16 @@ const closeDialog = () => {
 const saveItem = async () => {
   try {
     const formData = new FormData();
+    
+    // Append all keys from editedItem to formData
     for (const key in editedItem.value) {
-      if (key !== 'contract_image_path') { // Exclude path as it's handled by file upload
+      // Ensure that we append a value, even if it is null or empty
+      if (editedItem.value[key] !== null && editedItem.value[key] !== undefined) {
         formData.append(key, editedItem.value[key]);
       }
     }
-    if (contractImage.value) {
+
+    if (contractImage.value && contractImage.value.length > 0) {
       formData.append('contract_image', contractImage.value[0]);
     }
 
@@ -216,5 +254,9 @@ const deleteItem = async (item) => {
   }
 };
 
-onMounted(fetchContracts);
+onMounted(() => {
+  fetchContracts();
+  fetchRooms();
+  fetchTenants();
+});
 </script>

@@ -15,6 +15,7 @@
 - **Framework**: Vue.js 3 + Vuetify
 - **State Management**: Vuex (Vue)
 - **Build Tool**: Vite
+- **Charting**: Chart.js, Vue-Chartjs
 
 ### 확장 서비스
 - **SMS 서비스**: 네이버 클라우드 플랫폼 SENS 또는 KT SMS API
@@ -186,6 +187,7 @@ CREATE TABLE users (
 - ✅ 월세 납부 예정 자동 알림 (5일 전, 1일 전)
 - ✅ 월세 수납 현황 대시보드
 - ✅ 월별 수익 보고서
+- ✅ 월세 관리 CRUD 화면 (UI/UX 개선, 검색, 필터링, 유효성 검사, 알림 포함)
 
 ### 5. 알림 서비스
 - ✅ SMS 문자 발송
@@ -208,6 +210,7 @@ CREATE TABLE users (
 - 연체 현황
 - 월별 수입 통계 (지난 12개월)
 - 예정된 납부 내역
+- ✅ 주요 현황 요약 카드 (아이콘, 강조된 수치 포함)
 
 ### 2. 방 관리
 - 방 목록 (필터링, 검색)
@@ -236,6 +239,8 @@ CREATE TABLE users (
 - 연체 관리
 - 납부 내역 조회
 - 수납 통계
+- ✅ 월세 납부 내역 테이블 (검색, 필터링 기능)
+- ✅ 월세 등록/수정/삭제 다이얼로그 (유효성 검사, 계약 선택 드롭다운)
 
 ### 7. 알림 관리
 - 알림 발송 이력
@@ -244,27 +249,32 @@ CREATE TABLE users (
 
 ### 8. 보고서
 - 월별 수익 보고서 (연도별 조회, 상세 납부 내역 포함)
+- ✅ 월별 수익 차트 (Chart.js)
 
 ## 🔧 구현 우선순위
 
 ### Phase 1 (기본 기능)
-1. 데이터베이스 설계 및 구축
-2. 사용자 인증 시스템
-3. 방 관리 기능
-4. 임차인 관리 기능
-5. 기본 계약 관리 기능
+1. ✅ 데이터베이스 설계 및 구축
+2. ✅ 사용자 인증 시스템
+3. ✅ 방 관리 기능
+4. ✅ 임차인 관리 기능
+5. ✅ 기본 계약 관리 기능
 
 ### Phase 2 (핵심 기능)
-1. 월세 관리 기능
-2. 대시보드 구현
+1. ✅ 월세 관리 기능
+2. ✅ 대시보드 구현
 3. 파일 업로드 기능
-4. 검색 및 필터링 기능
+4. ✅ 검색 및 필터링 기능
 
 ### Phase 3 (확장 기능)
 1. SMS 알림 서비스 연동
 2. 카카오톡 알림 서비스 연동
 3. 자동 알림 시스템
 4. 통계 및 리포트 기능
+
+### 추가 완료된 기능
+- ✅ UI/UX 개선 및 스타일링 (월세 관리, 대시보드)
+- ✅ Chart.js 통합 (월별 수익 보고서)
 
 ## 📋 API 설계
 
@@ -346,15 +356,16 @@ cd oneroom-manager
 
 # 의존성 설치
 npm install
+cd frontend && npm install chart.js vue-chartjs && cd .. # Chart.js 및 vue-chartjs 설치 추가
 
 # 환경 변수 설정
 cp .env.example .env
 
-# 데이터베이스 초기화
-npm run db:migrate
+# 데이터베이스 초기화 및 샘플 데이터 삽입
+npm run db:reset
 
-# 개발 서버 실행
-npm run dev
+# 개발 서버 실행 (백엔드 및 프론트엔드 동시 실행)
+./run.bat # Windows 배치 파일
 ```
 
 ### 환경 변수 설정 (.env)
@@ -531,8 +542,9 @@ json{
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "db:migrate": "sequelize-cli db:migrate",
-    "db:seed": "sequelize-cli db:seed:all",
-    "db:reset": "sequelize-cli db:migrate:undo:all && npm run db:migrate && npm run db:seed"
+    "db:seed": "npx sequelize-cli db:seed:all",
+    "db:migrate:undo:all": "npx sequelize-cli db:migrate:undo:all",
+    "db:reset": "npm run db:migrate:undo:all && npm run db:migrate && npm run db:seed"
   }
 }
 8. 예외 처리 및 에러 관리

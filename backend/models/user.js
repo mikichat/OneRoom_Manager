@@ -35,6 +35,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'User',
+    underscored: true, // 추가: created_at, updated_at 필드 매핑
     hooks: {
       beforeCreate: async (user) => {
         const salt = await bcrypt.genSalt(10);
