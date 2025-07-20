@@ -94,6 +94,7 @@ exports.getDashboardSummary = async (req, res) => {
       monthlyIncome     // 추가된 부분
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };

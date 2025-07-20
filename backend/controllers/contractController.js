@@ -10,7 +10,8 @@ exports.createContract = async (req, res) => {
     const contract = await Contract.create(contractData);
     res.status(201).json(contract);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -40,7 +41,8 @@ exports.getAllContracts = async (req, res) => {
     });
     res.status(200).json(contracts);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -56,7 +58,8 @@ exports.getContractById = async (req, res) => {
       res.status(404).json({ message: 'Contract not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -79,7 +82,8 @@ exports.updateContract = async (req, res) => {
       res.status(404).json({ message: 'Contract not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -95,6 +99,7 @@ exports.deleteContract = async (req, res) => {
       res.status(404).json({ message: 'Contract not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };

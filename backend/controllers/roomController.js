@@ -11,7 +11,8 @@ exports.createRoom = async (req, res) => {
 
     res.status(201).json(room);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -28,7 +29,8 @@ exports.getAllRooms = async (req, res) => {
     });
     res.status(200).json(rooms);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -44,7 +46,8 @@ exports.getRoomById = async (req, res) => {
       res.status(404).json({ message: 'Room not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -71,7 +74,8 @@ exports.updateRoom = async (req, res) => {
       res.status(404).json({ message: 'Room not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -89,6 +93,7 @@ exports.deleteRoom = async (req, res) => {
       res.status(404).json({ message: 'Room not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };

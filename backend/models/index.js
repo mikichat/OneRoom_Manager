@@ -17,7 +17,7 @@ if (config.use_env_variable) {
   sequelize = new Sequelize({
     dialect: config.dialect,
     storage: config.storage,
-    logging: config.logging // config에서 logging 설정 가져오기
+    logging: config.logging ? console.log : false // config.logging이 true면 console.log, 아니면 false
   });
 }
 

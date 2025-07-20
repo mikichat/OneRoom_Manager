@@ -6,7 +6,8 @@ exports.createTenant = async (req, res) => {
     const tenant = await Tenant.create(req.body);
     res.status(201).json(tenant);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -30,7 +31,8 @@ exports.getAllTenants = async (req, res) => {
     const tenants = await Tenant.findAll({ where });
     res.status(200).json(tenants);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -44,7 +46,8 @@ exports.getTenantById = async (req, res) => {
       res.status(404).json({ message: 'Tenant not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -61,7 +64,8 @@ exports.updateTenant = async (req, res) => {
       res.status(404).json({ message: 'Tenant not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -77,6 +81,7 @@ exports.deleteTenant = async (req, res) => {
       res.status(404).json({ message: 'Tenant not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };

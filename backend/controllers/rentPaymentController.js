@@ -6,7 +6,8 @@ exports.createRentPayment = async (req, res) => {
     const rentPayment = await RentPayment.create(req.body);
     res.status(201).json(rentPayment);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -17,7 +18,8 @@ exports.getAllRentPayments = async (req, res) => {
     });
     res.status(200).json(rentPayments);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -33,7 +35,8 @@ exports.getRentPaymentById = async (req, res) => {
       res.status(404).json({ message: 'Rent payment not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -52,7 +55,8 @@ exports.updateRentPayment = async (req, res) => {
       res.status(404).json({ message: 'Rent payment not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -68,7 +72,8 @@ exports.deleteRentPayment = async (req, res) => {
       res.status(404).json({ message: 'Rent payment not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -85,6 +90,7 @@ exports.getOverdueRentPayments = async (req, res) => {
     });
     res.status(200).json(overduePayments);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
