@@ -246,5 +246,22 @@ const deleteItem = async (item) => {
   }
 };
 
+const exportToExcel = () => {
+  const data = tenants.value.map(tenant => ({
+    이름: tenant.name,
+    전화번호: tenant.phone,
+    이메일: tenant.email,
+    생년월일: tenant.birth_first_six,
+    비상연락처: tenant.emergency_contact,
+    비상연락처이름: tenant.emergency_name,
+    학생여부: tenant.is_student ? '예' : '아니오',
+    학교이름: tenant.school_name,
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '임차인 목록');
+  XLSX.writeFile(wb, '임차인_목록.xlsx');
+};
+
 onMounted(fetchTenants);
 </script>
