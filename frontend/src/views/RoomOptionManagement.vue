@@ -32,6 +32,7 @@
                   <v-toolbar-title>방 옵션 목록</v-toolbar-title>
                   <v-divider class="mx-4" inset vertical></v-divider>
                   <v-spacer></v-spacer>
+                  <v-btn color="primary" dark class="mb-2" @click="exportToExcel">엑셀 다운로드</v-btn>
                   <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">새 방 옵션</v-btn>
                 </v-toolbar>
               </template>
@@ -134,6 +135,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import apiClient from '../api';
+import * as XLSX from 'xlsx';
 
 const store = useStore();
 
