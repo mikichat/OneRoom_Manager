@@ -15,3 +15,4 @@ Performance Optimization:
 Key Conventions:
 Follow Vue.js docs for where makes sense
 
+파일 추가 및 수정 후에 항상 git 에 커밋 및 푸시
