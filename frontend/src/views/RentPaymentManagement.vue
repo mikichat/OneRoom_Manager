@@ -325,6 +325,23 @@ const deleteItem = async (item) => {
   }
 };
 
+const exportToExcel = () => {
+  const data = filteredRentPayments.value.map(payment => ({
+    호실: payment.contract.room ? payment.contract.room.room_number : '',
+    세입자이름: payment.contract.tenant ? payment.contract.tenant.name : '',
+    납부일: payment.payment_date,
+    금액: payment.amount,
+    납부방법: payment.payment_method,
+    납부상태: payment.payment_status,
+    납부기한: payment.due_date,
+    메모: payment.memo,
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '임대료 납부 내역');
+  XLSX.writeFile(wb, '임대료_납부_내역.xlsx');
+};
+
 onMounted(() => {
   fetchRentPayments();
   fetchContracts(); // 계약 목록도 가져오도록 추가
