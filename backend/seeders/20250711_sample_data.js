@@ -1,4 +1,6 @@
 'use strict';
+const { encrypt } = require('../utils/encryption'); // 암호화 함수 import
+const db = require('../models'); // db 객체 import
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -106,7 +108,10 @@ module.exports = {
     }], {});
 
     // Tenants
-    const tenants = await queryInterface.bulkInsert('tenants', [{
+    // queryInterface.bulkInsert 대신 Tenant 모델을 사용하여 암호화된 데이터 삽입
+    const { Tenant } = db; // db.Tenant를 통해 Tenant 모델 가져오기
+
+    const tenantsData = [{
       name: '김철수',
       phone: '010-1234-5678',
       email: 'kim@example.com',
@@ -128,12 +133,16 @@ module.exports = {
       school_name: null,
       created_at: new Date(),
       updated_at: new Date()
-    }], {}, { returning: true });
+    }];
 
-    const [tenant1Id] = await queryInterface.sequelize.query(
-      `SELECT id FROM tenants ORDER BY id ASC LIMIT 1`,
-      { type: Sequelize.QueryTypes.SELECT }
-    );
+    const createdTenants = [];
+    for (const data of tenantsData) {
+      // Tenant.create를 사용하여 모델의 set 메서드를 통해 데이터 암호화
+      const tenant = await Tenant.create(data);
+      createdTenants.push(tenant);
+    }
+
+    const tenant1Id = createdTenants[0].id; // 생성된 첫 번째 테넌트의 ID 사용
 
     // Contracts (room_id, tenant_id는 위에서 생성된 room, tenant의 id를 참조해야 함)
     const [contractRoomId] = await queryInterface.sequelize.query(
@@ -143,7 +152,7 @@ module.exports = {
 
     await queryInterface.bulkInsert('contracts', [{
       room_id: contractRoomId.id, // 임대중인 방
-      tenant_id: tenant1Id.id,
+      tenant_id: tenant1Id,
       contract_start_date: '2024-03-01',
       contract_end_date: '2025-02-28',
       monthly_rent: 550000,
