@@ -2,7 +2,7 @@
 const {
   Model
 } = require('sequelize');
-const { encrypt, decrypt } = require('../utils/cryptoUtils'); // cryptoUtils import
+const { encrypt, decrypt } = require('../utils/encryption'); // cryptoUtils import
 
 module.exports = (sequelize, DataTypes) => {
   class Tenant extends Model {
@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
     phone: {
       type: DataTypes.STRING(20),
       allowNull: false,
-      unique: true,
+      // unique: true, // Unique constraint should be removed or handled carefully with encryption
       set(value) {
         this.setDataValue('phone', encrypt(value));
       },
@@ -69,8 +69,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Tenant',
-    timestamps: true, // createdAt 및 updatedAt 자동 관리를 위해 추가
-    underscored: true // created_at 및 updated_at 컬럼 매핑을 위해 추가
+    timestamps: true,
+    underscored: true
   });
   return Tenant;
 };
