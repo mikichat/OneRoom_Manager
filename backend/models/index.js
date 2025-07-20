@@ -16,7 +16,8 @@ if (config.use_env_variable) {
   // SQLite의 경우 storage만 사용
   sequelize = new Sequelize({
     dialect: config.dialect,
-    storage: config.storage,
+    // storage: config.storage, // 기존 라인 주석 처리 또는 삭제
+    storage: path.resolve(process.cwd(), config.storage),
     logging: config.logging ? console.log : false // config.logging이 true면 console.log, 아니면 false
   });
 }
