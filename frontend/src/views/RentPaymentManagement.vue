@@ -285,6 +285,29 @@ const saveItem = async () => {
   }
 };
 
+const fetchRentPayments = async () => {
+  try {
+    const response = await apiClient.get('/rent-payments');
+    rentPayments.value = response.data;
+  } catch (error) {
+    console.error('Error fetching rent payments:', error);
+    snackbar.value = { show: true, message: `임대료 납부 내역을 가져오는 중 오류가 발생했습니다: ${error.message}`, color: 'error' };
+  }
+};
+
+const fetchContracts = async () => {
+  try {
+    const response = await apiClient.get('/contracts');
+    contracts.value = response.data.map(contract => ({
+      ...contract,
+      contractDisplay: `Room ${contract.room.room_number} - ${contract.tenant.name}`
+    }));
+  } catch (error) {
+    console.error('Error fetching contracts:', error);
+    snackbar.value = { show: true, message: `계약 목록을 가져오는 중 오류가 발생했습니다: ${error.message}`, color: 'error' };
+  }
+};
+
 const editItem = (item) => {
   openDialog(item);
 };
