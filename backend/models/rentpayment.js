@@ -42,6 +42,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'RentPayment',
+    timestamps: true,
+    underscored: true
   });
   return RentPayment;
 };

@@ -38,6 +38,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Notification',
+    timestamps: true,
+    underscored: true
   });
   return Notification;
 };

@@ -43,6 +43,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Room',
+    timestamps: true,
+    underscored: true
   });
   return Room;
 };

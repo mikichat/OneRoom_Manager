@@ -35,6 +35,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'User',
+    timestamps: true,
     underscored: true, // 추가: created_at, updated_at 필드 매핑
     hooks: {
       beforeCreate: async (user) => {
