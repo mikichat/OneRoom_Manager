@@ -2,17 +2,17 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h1 class="text-h4">Room Option Management</h1>
+        <h1 class="text-h4">방 옵션 관리</h1>
       </v-col>
       <v-col cols="12">
         <v-card>
-          <v-card-title>Room Options</v-card-title>
+          <v-card-title>방 옵션</v-card-title>
           <v-card-text>
             <v-row class="mb-4">
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model="searchRoomId"
-                  label="Search by Room ID"
+                  label="호실 ID로 검색"
                   clearable
                   density="compact"
                   hide-details
@@ -29,10 +29,10 @@
             >
               <template v-slot:top>
                 <v-toolbar flat>
-                  <v-toolbar-title>Room Option List</v-toolbar-title>
+                  <v-toolbar-title>방 옵션 목록</v-toolbar-title>
                   <v-divider class="mx-4" inset vertical></v-divider>
                   <v-spacer></v-spacer>
-                  <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">New Room Option</v-btn>
+                  <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">새 방 옵션</v-btn>
                 </v-toolbar>
               </template>
               <template v-slot:item.room_number="{ item }">
@@ -93,28 +93,28 @@
           <v-container>
             <v-row>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="editedItem.room_id" label="Room ID" type="number"></v-text-field>
+                <v-text-field v-model="editedItem.room_id" label="호실 ID" type="number"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-checkbox v-model="editedItem.refrigerator" label="Refrigerator"></v-checkbox>
+                <v-checkbox v-model="editedItem.refrigerator" label="냉장고"></v-checkbox>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-checkbox v-model="editedItem.washing_machine" label="Washing Machine"></v-checkbox>
+                <v-checkbox v-model="editedItem.washing_machine" label="세탁기"></v-checkbox>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-checkbox v-model="editedItem.air_conditioner" label="Air Conditioner"></v-checkbox>
+                <v-checkbox v-model="editedItem.air_conditioner" label="에어컨"></v-checkbox>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-checkbox v-model="editedItem.induction" label="Induction"></v-checkbox>
+                <v-checkbox v-model="editedItem.induction" label="인덕션"></v-checkbox>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-checkbox v-model="editedItem.microwave" label="Microwave"></v-checkbox>
+                <v-checkbox v-model="editedItem.microwave" label="전자레인지"></v-checkbox>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-checkbox v-model="editedItem.tv" label="TV"></v-checkbox>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-checkbox v-model="editedItem.wifi_router" label="WiFi Router"></v-checkbox>
+                <v-checkbox v-model="editedItem.wifi_router" label="무선 공유기"></v-checkbox>
               </v-col>
             </v-row>
           </v-container>
@@ -122,8 +122,8 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="saveItem">Save</v-btn>
+          <v-btn color="blue darken-1" text @click="closeDialog">취소</v-btn>
+          <v-btn color="blue darken-1" text @click="saveItem">저장</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -164,19 +164,19 @@ const defaultItem = {
 };
 
 const baseHeaders = [
-  { title: 'Room Number', key: 'room.room_number' },
-  { title: 'Refrigerator', key: 'refrigerator' },
-  { title: 'Washing Machine', key: 'washing_machine' },
-  { title: 'Air Conditioner', key: 'air_conditioner' },
-  { title: 'Induction', key: 'induction' },
-  { title: 'Microwave', key: 'microwave' },
+  { title: '호실 번호', key: 'room.room_number' },
+  { title: '냉장고', key: 'refrigerator' },
+  { title: '세탁기', key: 'washing_machine' },
+  { title: '에어컨', key: 'air_conditioner' },
+  { title: '인덕션', key: 'induction' },
+  { title: '전자레인지', key: 'microwave' },
   { title: 'TV', key: 'tv' },
-  { title: 'WiFi Router', key: 'wifi_router' },
+  { title: '무선 공유기', key: 'wifi_router' },
 ];
 
 const filteredHeaders = computed(() => {
   if (isAdmin.value) {
-    return [...baseHeaders, { title: 'Actions', key: 'actions', sortable: false }];
+    return [...baseHeaders, { title: '작업', key: 'actions', sortable: false }];
   } else {
     return baseHeaders;
   }
@@ -187,7 +187,7 @@ const isAdmin = computed(() => {
 });
 
 const formTitle = computed(() => {
-  return editedIndex.value === -1 ? 'New Room Option' : 'Edit Room Option';
+  return editedIndex.value === -1 ? '새 방 옵션' : '방 옵션 수정';
 });
 
 let debounceTimeout = null;

@@ -2,13 +2,13 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h1 class="text-h4">Monthly Income Report</h1>
+        <h1 class="text-h4">월별 수입 보고서</h1>
       </v-col>
       <v-col cols="12" md="3">
         <v-select
           v-model="selectedYear"
           :items="availableYears"
-          label="Select Year"
+          label="년도 선택"
           @update:model-value="fetchMonthlyIncomeReport"
           density="compact"
           hide-details
@@ -17,7 +17,7 @@
       </v-col>
       <v-col cols="12">
         <v-card>
-          <v-card-title>Monthly Income Summary for {{ selectedYear }}</v-card-title>
+          <v-card-title>{{ selectedYear }}년 월별 수입 요약</v-card-title>
           <v-card-text>
             <v-data-table
               :headers="headers"
@@ -27,7 +27,7 @@
               class="elevation-1"
             >
               <template v-slot:item.month="{ item }">
-                {{ item.month }}
+                {{ item.month }}월
               </template>
               <template v-slot:item.total_amount="{ item }">
                 {{ formatCurrency(item.total_amount) }}
@@ -44,14 +44,14 @@
 
       <v-col cols="12">
         <v-card>
-          <v-card-title>Monthly Income Chart</v-card-title>
+          <v-card-title>월별 수입 차트</v-card-title>
           <v-card-text>
             <Bar
               v-if="chartData.labels.length"
               :data="chartData"
               :options="chartOptions"
             />
-            <v-card-text v-else>No chart data available for this year.</v-card-text>
+            <v-card-text v-else>해당 년도에는 차트 데이터가 없습니다.</v-card-text>
           </v-card-text>
         </v-card>
       </v-col>
@@ -59,7 +59,7 @@
 
     <v-dialog v-model="detailsDialog" max-width="800px">
       <v-card>
-        <v-card-title>Payment Details for {{ selectedMonthDetails }}</v-card-title>
+        <v-card-title>{{ selectedMonthDetails }} 지불 내역</v-card-title>
         <v-card-text>
           <v-data-table
             :headers="detailHeaders"
@@ -77,7 +77,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="detailsDialog = false">Close</v-btn>
+          <v-btn color="blue darken-1" text @click="detailsDialog = false">닫기</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -105,18 +105,18 @@ const selectedMonthDetails = ref('');
 const currentPaymentDetails = ref([]);
 
 const headers = [
-  { title: 'Month', key: 'month' },
-  { title: 'Total Amount', key: 'total_amount' },
-  { title: 'Details', key: 'details', sortable: false },
+  { title: '월', key: 'month' },
+  { title: '총 수입', key: 'total_amount' },
+  { title: '세부 정보', key: 'details', sortable: false },
 ];
 
 const detailHeaders = [
-  { title: 'Room Number', key: 'room_number' },
-  { title: 'Tenant Name', key: 'tenant_name' },
-  { title: 'Amount', key: 'amount' },
-  { title: 'Payment Date', key: 'payment_date' },
-  { title: 'Payment Method', key: 'payment_method' },
-  { title: 'Memo', key: 'memo' },
+  { title: '호실', key: 'room_number' },
+  { title: '임차인 이름', key: 'tenant_name' },
+  { title: '금액', key: 'amount' },
+  { title: '지불일', key: 'payment_date' },
+  { title: '지불 방법', key: 'payment_method' },
+  { title: '메모', key: 'memo' },
 ];
 
 const chartData = computed(() => {
@@ -127,7 +127,7 @@ const chartData = computed(() => {
     labels: labels,
     datasets: [
       {
-        label: 'Monthly Income',
+        label: '월별 수입',
         backgroundColor: '#42A5F5',
         data: data,
       },
@@ -135,7 +135,7 @@ const chartData = computed(() => {
   };
 });
 
-const chartOptions = { // 차트 옵션 정의
+const chartOptions = { 
   responsive: true,
   maintainAspectRatio: false,
   scales: {
@@ -143,7 +143,7 @@ const chartOptions = { // 차트 옵션 정의
       beginAtZero: true,
       title: {
         display: true,
-        text: 'Amount (KRW)',
+        text: '금액 (KRW)',
       },
       ticks: {
         callback: function(value) {
@@ -154,7 +154,7 @@ const chartOptions = { // 차트 옵션 정의
     x: {
       title: {
         display: true,
-        text: 'Month',
+        text: '월',
       },
     },
   },
@@ -194,7 +194,7 @@ const fetchMonthlyIncomeReport = async () => {
 
 const showPaymentDetails = (payments) => {
   currentPaymentDetails.value = payments;
-  selectedMonthDetails.value = payments.length > 0 ? new Date(payments[0].payment_date).toLocaleString('default', { month: 'long', year: 'numeric' }) : '';
+  selectedMonthDetails.value = payments.length > 0 ? new Date(payments[0].payment_date).toLocaleString('ko-KR', { month: 'long', year: 'numeric' }) : '';
   detailsDialog.value = true;
 };
 
