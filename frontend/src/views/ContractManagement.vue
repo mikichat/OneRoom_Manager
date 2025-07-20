@@ -8,6 +8,32 @@
         <v-card>
           <v-card-title>계약</v-card-title>
           <v-card-text>
+            <v-row class="align-center">
+              <v-col cols="12" sm="4">
+                <v-select
+                  v-model="statusFilter"
+                  :items="['전체', '활성', '만료', '해지']"
+                  label="상태 필터"
+                  dense
+                  outlined
+                  hide-details
+                ></v-select>
+              </v-col>
+              <v-col cols="12" sm="4">
+                <v-text-field
+                  v-model="searchQuery"
+                  label="호실 또는 임차인 검색"
+                  dense
+                  outlined
+                  clearable
+                  hide-details
+                  @keyup.enter="fetchContracts"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="2">
+                  <v-btn @click="fetchContracts">검색</v-btn>
+              </v-col>
+            </v-row>
             <v-data-table
               :headers="filteredHeaders"
               :items="contracts"
@@ -21,6 +47,11 @@
                   <v-spacer></v-spacer>
                   <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">새 계약</v-btn>
                 </v-toolbar>
+              </template>
+              <template v-slot:item.contract_image_path="{ item }">
+                <a :href="`http://localhost:3000/${item.contract_image_path}`" target="_blank" v-if="item.contract_image_path">
+                  <v-icon>mdi-file-document</v-icon>
+                </a>
               </template>
               <template v-slot:item.actions="{ item }">
                 <v-icon v-if="isAdmin" small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
@@ -72,7 +103,8 @@
                 <v-text-field v-model="editedItem.deposit" label="보증금" type="number"></v-text-field>
               </v-col>
               <v-col cols="12">
-                <v-file-input v-model="contractImage" label="계약서 이미지" prepend-icon="mdi-paperclip" clearable></v-file-input>
+                <v-file-input v-model="contractImage" label="계약서 이미지" prepend-icon="mdi-paperclip" clearable @change="onFileChange"></v-file-input>
+                <v-img :src="imageUrl" v-if="imageUrl" height="200px" class="mt-2"></v-img>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-select
@@ -99,7 +131,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useStore } from 'vuex';
 import apiClient from '../api';
 
@@ -109,8 +141,11 @@ const contracts = ref([]);
 const rooms = ref([]);
 const tenants = ref([]);
 const dialog = ref(false);
+const statusFilter = ref('전체');
+const searchQuery = ref('');
 const editedIndex = ref(-1);
-const contractImage = ref(null);
+const contractImage = ref([]);
+const imageUrl = ref('');
 
 const editedItem = ref({
   room_id: null,
@@ -142,6 +177,7 @@ const baseHeaders = [
   { title: '계약 종료일', key: 'contract_end_date' },
   { title: '월세', key: 'monthly_rent' },
   { title: '상태', key: 'contract_status' },
+  { title: '계약서', key: 'contract_image_path', sortable: false },
 ];
 
 const filteredHeaders = computed(() => {
@@ -162,7 +198,14 @@ const formTitle = computed(() => {
 
 const fetchContracts = async () => {
   try {
-    const response = await apiClient.get('/contracts');
+    const params = new URLSearchParams();
+    if (statusFilter.value && statusFilter.value !== '전체') {
+      params.append('contract_status', statusFilter.value);
+    }
+    if (searchQuery.value) {
+      params.append('search', searchQuery.value);
+    }
+    const response = await apiClient.get(`/contracts?${params.toString()}`);
     contracts.value = response.data;
   } catch (error) {
     console.error('Error fetching contracts:', error);
@@ -191,6 +234,11 @@ const fetchTenants = async () => {
 const openDialog = (item) => {
   editedIndex.value = contracts.value.indexOf(item);
   editedItem.value = item ? { ...item } : { ...defaultItem };
+  if (editedItem.value.contract_image_path) {
+    imageUrl.value = `http://localhost:3000/${editedItem.value.contract_image_path}`;
+  } else {
+    imageUrl.value = '';
+  }
   dialog.value = true;
 };
 
@@ -198,7 +246,8 @@ const closeDialog = () => {
   dialog.value = false;
   editedIndex.value = -1;
   editedItem.value = { ...defaultItem };
-  contractImage.value = null;
+  contractImage.value = [];
+  imageUrl.value = '';
 };
 
 const saveItem = async () => {
@@ -239,8 +288,13 @@ const saveItem = async () => {
   }
 };
 
-const editItem = (item) => {
-  openDialog(item);
+const onFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    imageUrl.value = URL.createObjectURL(file);
+  } else {
+    imageUrl.value = '';
+  }
 };
 
 const deleteItem = async (item) => {
@@ -259,4 +313,6 @@ onMounted(() => {
   fetchRooms();
   fetchTenants();
 });
+
+watch(statusFilter, fetchContracts);
 </script>
