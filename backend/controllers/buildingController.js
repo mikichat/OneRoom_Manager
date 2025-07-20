@@ -1,20 +1,33 @@
 const { Building } = require('../models');
+const { Op } = require('sequelize');
 
 exports.createBuilding = async (req, res) => {
   try {
     const building = await Building.create(req.body);
     res.status(201).json(building);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error creating building:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
 exports.getAllBuildings = async (req, res) => {
   try {
-    const buildings = await Building.findAll();
+    const { search } = req.query;
+    const where = {};
+
+    if (search) {
+      where[Op.or] = [
+        { name: { [Op.like]: `%${search}%` } },
+        { address: { [Op.like]: `%${search}%` } },
+      ];
+    }
+
+    const buildings = await Building.findAll({ where });
     res.status(200).json(buildings);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching buildings:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -28,7 +41,8 @@ exports.getBuildingById = async (req, res) => {
       res.status(404).json({ message: 'Building not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching building by ID:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -45,7 +59,8 @@ exports.updateBuilding = async (req, res) => {
       res.status(404).json({ message: 'Building not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error updating building:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -61,6 +76,7 @@ exports.deleteBuilding = async (req, res) => {
       res.status(404).json({ message: 'Building not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error deleting building:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };

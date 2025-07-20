@@ -47,6 +47,12 @@ const routes = [
     meta: { requiresAuth: true, requiredRoles: ['admin'] }
   },
   {
+    path: '/buildings',
+    name: 'building-management',
+    component: () => import('../views/BuildingManagement.vue'),
+    meta: { requiresAuth: true, requiredRoles: ['admin'] }
+  },
+  {
     path: '/dashboard',
     name: 'dashboard',
     component: () => import('../views/DashboardView.vue'),

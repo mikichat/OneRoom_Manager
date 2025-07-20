@@ -6,6 +6,7 @@
       <v-spacer></v-spacer>
       <v-btn text to="/" v-if="isAuthenticated">홈</v-btn>
       <v-btn text to="/dashboard" v-if="isAuthenticated">대시보드</v-btn>
+      <v-btn text to="/buildings" v-if="isAdmin">건물 관리</v-btn>
       <v-btn text to="/rooms" v-if="isAdmin">호실 관리</v-btn>
       <v-btn text to="/tenants" v-if="isAdmin">임차인 관리</v-btn>
       <v-btn text to="/contracts" v-if="isAdmin">계약 관리</v-btn>
@@ -30,6 +31,12 @@
             <v-icon>mdi-view-dashboard</v-icon>
           </template>
           <v-list-item-title>대시보드</v-list-item-title>
+        </v-list-item>
+        <v-list-item to="/buildings" v-if="isAdmin">
+          <template v-slot:prepend>
+            <v-icon>mdi-office-building</v-icon>
+          </template>
+          <v-list-item-title>건물 관리</v-list-item-title>
         </v-list-item>
         <v-list-item to="/rooms" v-if="isAdmin">
           <template v-slot:prepend>
@@ -101,7 +108,7 @@
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
       {{ snackbar.message }}
       <template v-slot:actions>
-        <v-btn text @click="snackbar.show = false">Close</v-btn>
+        <v-btn text @click="snackbar.show = false">닫기</v-btn>
       </template>
     </v-snackbar>
   </v-app>
