@@ -1,7 +1,7 @@
 {
   "development": {
     "dialect": "sqlite",
-    "storage": "../database/oneroom.db"
+    "storage": "../../database/oneroom.db"
   },
   "test": {
     "dialect": "sqlite",
@@ -9,6 +9,6 @@
   },
   "production": {
     "dialect": "sqlite",
-    "storage": "../database/oneroom.db"
+    "storage": "../../database/oneroom.db"
   }
 }
