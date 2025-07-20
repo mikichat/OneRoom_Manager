@@ -1,4 +1,5 @@
 const { RentPayment, Contract } = require('../models');
+const { Sequelize } = require('../models'); // Sequelize 객체를 가져옴
 
 exports.createRentPayment = async (req, res) => {
   try {
@@ -77,7 +78,7 @@ exports.getOverdueRentPayments = async (req, res) => {
       where: {
         payment_status: '미납',
         due_date: {
-          [db.Sequelize.Op.lt]: new Date() // 현재 날짜보다 이전인 due_date
+          [Sequelize.Op.lt]: new Date() // db.Sequelize.Op.lt를 Sequelize.Op.lt로 수정
         }
       },
       include: [{ model: Contract, as: 'contract' }]

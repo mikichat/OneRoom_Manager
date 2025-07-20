@@ -14,6 +14,12 @@
               :items-per-page="5"
               class="elevation-1"
             >
+              <template v-slot:item.payment_date="{ item }">
+                {{ formatDate(item.payment_date) }}
+              </template>
+              <template v-slot:item.due_date="{ item }">
+                {{ formatDate(item.due_date) }}
+              </template>
               <template v-slot:top>
                 <v-toolbar flat>
                   <v-toolbar-title>Rent Payment List</v-toolbar-title>
@@ -42,7 +48,13 @@
           <v-container>
             <v-row>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.contract_id" label="Contract ID"></v-text-field>
+                <v-select
+                  v-model="editedItem.contract_id"
+                  :items="contracts"
+                  item-title="contractDisplay"
+                  item-value="id"
+                  label="Contract"
+                ></v-select>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field v-model="editedItem.payment_date" label="Payment Date" type="date"></v-text-field>
@@ -92,6 +104,7 @@ import apiClient from '../api';
 const store = useStore(); // store 초기화
 
 const rentPayments = ref([]);
+const contracts = ref([]); // 계약 목록을 저장할 ref 추가
 const dialog = ref(false);
 const editedIndex = ref(-1);
 const editedItem = ref({
@@ -114,7 +127,8 @@ const defaultItem = {
 };
 
 const baseHeaders = [
-  { title: 'Contract ID', key: 'contract_id' },
+  { title: 'Room Number', key: 'contract.room.room_number' }, // 호실 번호 추가
+  { title: 'Tenant Name', key: 'contract.tenant.name' },     // 임차인 이름 추가
   { title: 'Payment Date', key: 'payment_date' },
   { title: 'Amount', key: 'amount' },
   { title: 'Payment Method', key: 'payment_method' },
@@ -138,6 +152,11 @@ const formTitle = computed(() => {
   return editedIndex.value === -1 ? 'New Rent Payment' : 'Edit Rent Payment';
 });
 
+const formatDate = (dateString) => {
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+};
+
 const fetchRentPayments = async () => {
   try {
     const response = await apiClient.get('/rent-payments');
@@ -147,9 +166,28 @@ const fetchRentPayments = async () => {
   }
 };
 
+const fetchContracts = async () => {
+  try {
+    const response = await apiClient.get('/contracts');
+    contracts.value = response.data.map(contract => ({
+      ...contract,
+      contractDisplay: `Room: ${contract.room.room_number}, Tenant: ${contract.tenant.name}, Rent: ${contract.monthly_rent}`
+    }));
+  } catch (error) {
+    console.error('Error fetching contracts:', error);
+  }
+};
+
 const openDialog = (item) => {
   editedIndex.value = rentPayments.value.indexOf(item);
   editedItem.value = item ? { ...item } : { ...defaultItem };
+  // 날짜 필드를 YYYY-MM-DD 형식으로 변환
+  if (editedItem.value.payment_date) {
+    editedItem.value.payment_date = new Date(editedItem.value.payment_date).toISOString().substr(0, 10);
+  }
+  if (editedItem.value.due_date) {
+    editedItem.value.due_date = new Date(editedItem.value.due_date).toISOString().substr(0, 10);
+  }
   dialog.value = true;
 };
 
@@ -190,5 +228,8 @@ const deleteItem = async (item) => {
   }
 };
 
-onMounted(fetchRentPayments);
+onMounted(() => {
+  fetchRentPayments();
+  fetchContracts(); // 계약 목록도 가져오도록 추가
+});
 </script>

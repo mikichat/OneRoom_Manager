@@ -5,31 +5,23 @@ module.exports = {
     // Users
     await queryInterface.bulkInsert('users', [{
       username: 'admin',
-      password: 'hashed_password_for_admin', // 실제 환경에서는 bcrypt 등으로 해싱된 비밀번호 사용
-      role: 'admin',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      password: '$2b$10$YqEuNKnV.XhPVfQ3ckusLOGYrhvl3C4iIxY5xT3MD1zCdctCMSEWS', // 실제 환경에서는 bcrypt 등으로 해싱된 비밀번호 사용
+      role: 'admin'
     }, {
       username: 'user1',
-      password: 'hashed_password_for_user1', // 실제 환경에서는 bcrypt 등으로 해싱된 비밀번호 사용
-      role: 'user',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      password: '$2b$10$YqEuNKnV.XhPVfQ3ckusLOGYrhvl3C4iIxY5xT3MD1zCdctCMSEWS', // 실제 환경에서는 bcrypt 등으로 해싱된 비밀번호 사용
+      role: 'user'
     }], {});
 
     // Buildings
     await queryInterface.bulkInsert('buildings', [{
       name: '행복빌딩',
       address: '서울시 강남구 행복동 123-1',
-      total_floors: 5,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      total_floors: 5
     }, {
       name: '미래빌딩',
       address: '서울시 서초구 미래동 456-2',
-      total_floors: 7,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      total_floors: 7
     }], {});
 
     // Rooms (building_id는 위에서 생성된 building의 id를 참조해야 함)
@@ -43,9 +35,7 @@ module.exports = {
       monthly_rent: 500000,
       deposit: 5000000,
       status: '임대가능',
-      description: '남향, 채광 좋음',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      description: '남향, 채광 좋음'
     }, {
       building_id: 1,
       room_number: '201',
@@ -55,9 +45,7 @@ module.exports = {
       monthly_rent: 550000,
       deposit: 5500000,
       status: '임대중',
-      description: '넓은 방, 조용함',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      description: '넓은 방, 조용함'
     }, {
       building_id: 2,
       room_number: '301',
@@ -67,9 +55,7 @@ module.exports = {
       monthly_rent: 800000,
       deposit: 8000000,
       status: '수리중',
-      description: '신축, 풀옵션',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      description: '신축, 풀옵션'
     }], {});
 
     // Room Options (room_id는 위에서 생성된 room의 id를 참조해야 함)
@@ -82,7 +68,7 @@ module.exports = {
       microwave: false,
       tv: false,
       wifi_router: true,
-      updatedAt: new Date()
+      updated_at: new Date()
     }, {
       room_id: 2,
       refrigerator: true,
@@ -92,7 +78,7 @@ module.exports = {
       microwave: true,
       tv: true,
       wifi_router: true,
-      updatedAt: new Date()
+      updated_at: new Date()
     }], {});
 
     // Tenants
@@ -104,9 +90,7 @@ module.exports = {
       emergency_contact: '010-9876-5432',
       emergency_name: '김영희',
       is_student: true,
-      school_name: '한국대학교',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      school_name: '한국대학교'
     }, {
       name: '박영희',
       phone: '010-2345-6789',
@@ -115,9 +99,7 @@ module.exports = {
       emergency_contact: '010-8765-4321',
       emergency_name: '박철수',
       is_student: false,
-      school_name: null,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      school_name: null
     }], {});
 
     // Contracts (room_id, tenant_id는 위에서 생성된 room, tenant의 id를 참조해야 함)
@@ -130,9 +112,7 @@ module.exports = {
       deposit: 5500000,
       contract_image_path: null,
       contract_status: '활성',
-      special_terms: '애완동물 금지',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      special_terms: '애완동물 금지'
     }], {});
 
     // Rent Payments (contract_id는 위에서 생성된 contract의 id를 참조해야 함)
@@ -144,7 +124,7 @@ module.exports = {
       payment_status: '완료',
       due_date: '2024-03-01',
       memo: '3월 월세',
-      createdAt: new Date()
+      created_at: new Date()
     }, {
       contract_id: 1,
       payment_date: '2024-04-01',
@@ -153,16 +133,16 @@ module.exports = {
       payment_status: '완료',
       due_date: '2024-04-01',
       memo: '4월 월세',
-      createdAt: new Date()
+      created_at: new Date()
     }, {
       contract_id: 1,
-      payment_date: null, // 아직 미납
+      payment_date: new Date(), // 아직 미납
       amount: 550000,
       payment_method: '계좌이체',
       payment_status: '미납',
       due_date: '2024-05-01',
       memo: '5월 월세',
-      createdAt: new Date()
+      created_at: new Date()
     }], {});
 
   },

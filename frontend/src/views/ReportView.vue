@@ -30,7 +30,7 @@
                 {{ item.month }}
               </template>
               <template v-slot:item.total_amount="{ item }">
-                {{ item.total_amount }}
+                {{ formatCurrency(item.total_amount) }}
               </template>
               <template v-slot:item.details="{ item }">
                 <v-btn icon size="small" variant="text" @click="showPaymentDetails(item.payments)">
@@ -56,6 +56,9 @@
             <template v-slot:item.payment_date="{ item }">
               {{ new Date(item.payment_date).toLocaleDateString() }}
             </template>
+            <template v-slot:item.amount="{ item }">
+              {{ formatCurrency(item.amount) }}
+            </template>
           </v-data-table>
         </v-card-text>
         <v-card-actions>
@@ -74,6 +77,10 @@ import apiClient from '../api';
 const monthlyIncomeData = ref([]);
 const selectedYear = ref(new Date().getFullYear());
 const availableYears = ref([]);
+
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(value);
+};
 
 const detailsDialog = ref(false);
 const selectedMonthDetails = ref('');
