@@ -1,7 +1,8 @@
 {
   "development": {
     "dialect": "sqlite",
-    "storage": "../../database/oneroom.db"
+    "storage": "../../database/oneroom.db",
+    "debugLogging": true
   },
   "test": {
     "dialect": "sqlite",
