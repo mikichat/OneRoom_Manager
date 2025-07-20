@@ -21,4 +21,16 @@ apiClient.interceptors.request.use(
   }
 );
 
+// Excel related API calls
+export const downloadExcel = (endpoint) => apiClient.get(`${endpoint}/excel/download`, { responseType: 'blob' });
+export const uploadExcel = (endpoint, file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return apiClient.post(`${endpoint}/excel/upload`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
 export default apiClient;

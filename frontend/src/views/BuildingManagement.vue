@@ -20,6 +20,11 @@
                   @input="fetchBuildingsDebounced"
                 ></v-text-field>
               </v-col>
+              <v-col cols="12" md="6" class="d-flex justify-end align-center">
+                <v-btn color="green" dark class="mr-2" @click="downloadExcelData" :loading="loading">엑셀 다운로드</v-btn>
+                <input type="file" ref="excelUploadInput" style="display: none;" @change="handleFileUpload" accept=".xlsx, .xls" />
+                <v-btn color="blue" dark @click="triggerFileUpload" :loading="loading">엑셀 업로드</v-btn>
+              </v-col>
             </v-row>
             <v-data-table
               :headers="filteredHeaders"
@@ -74,19 +79,31 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+      {{ snackbar.message }}
+    </v-snackbar>
   </v-container>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
-import apiClient from '../api';
+import apiClient, { downloadExcel, uploadExcel } from '../api';
+// import * as XLSX from 'xlsx'; // Uncomment if client-side excel processing is needed
 
 const store = useStore();
 const buildings = ref([]);
 const dialog = ref(false);
 const editedIndex = ref(-1);
 const searchQuery = ref('');
+const loading = ref(false);
+const excelUploadInput = ref(null);
+const snackbar = ref({
+  show: false,
+  message: '',
+  color: '',
+});
 
 const editedItem = ref({
   name: '',
@@ -167,8 +184,10 @@ const saveItem = async () => {
     }
     closeDialog();
     fetchBuildings(); // Refresh list
+    showSnackbar('저장되었습니다.', 'success');
   } catch (error) {
     console.error('Error saving building:', error);
+    showSnackbar('저장 중 오류가 발생했습니다.', 'error');
   }
 };
 
@@ -181,22 +200,60 @@ const deleteItem = async (item) => {
     try {
       await apiClient.delete(`/buildings/${item.id}`);
       fetchBuildings(); // Refresh list
+      showSnackbar('삭제되었습니다.', 'success');
     } catch (error) {
       console.error('Error deleting building:', error);
+      showSnackbar('삭제 중 오류가 발생했습니다.', 'error');
     }
   }
 };
 
-const exportToExcel = () => {
-  const data = buildings.value.map(building => ({
-    이름: building.name,
-    주소: building.address,
-    총층수: building.total_floors,
-  }));
-  const ws = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '건물 목록');
-  XLSX.writeFile(wb, '건물_목록.xlsx');
+const downloadExcelData = async () => {
+  loading.value = true;
+  try {
+    const response = await downloadExcel('/buildings');
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '건물_목록.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    showSnackbar('엑셀 다운로드가 완료되었습니다.', 'success');
+  } catch (error) {
+    console.error('Error downloading excel:', error);
+    showSnackbar('엑셀 다운로드 중 오류가 발생했습니다.', 'error');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const triggerFileUpload = () => {
+  excelUploadInput.value.click();
+};
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  loading.value = true;
+  try {
+    await uploadExcel('/buildings', file);
+    showSnackbar('엑셀 업로드가 완료되었습니다.', 'success');
+    fetchBuildings(); // Refresh list after upload
+  } catch (error) {
+    console.error('Error uploading excel:', error);
+    showSnackbar('엑셀 업로드 중 오류가 발생했습니다.', 'error');
+  } finally {
+    loading.value = false;
+    event.target.value = null; // Clear the input so the same file can be uploaded again
+  }
+};
+
+const showSnackbar = (message, color) => {
+  snackbar.value.message = message;
+  snackbar.value.color = color;
+  snackbar.value.show = true;
 };
 
 onMounted(fetchBuildings);

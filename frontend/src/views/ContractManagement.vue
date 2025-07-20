@@ -8,7 +8,7 @@
         <v-card>
           <v-card-title>계약</v-card-title>
           <v-card-text>
-            <v-row class="align-center">
+            <v-row class="align-center mb-4">
               <v-col cols="12" sm="4">
                 <v-select
                   v-model="statusFilter"
@@ -32,6 +32,11 @@
               </v-col>
               <v-col cols="12" sm="2">
                   <v-btn @click="fetchContracts">검색</v-btn>
+              </v-col>
+              <v-col cols="12" sm="2" class="d-flex justify-end align-center">
+                <v-btn color="green" dark class="mr-2" @click="downloadExcelData" :loading="loading">엑셀 다운로드</v-btn>
+                <input type="file" ref="excelUploadInput" style="display: none;" @change="handleFileUpload" accept=".xlsx, .xls" />
+                <v-btn color="blue" dark @click="triggerFileUpload" :loading="loading">엑셀 업로드</v-btn>
               </v-col>
             </v-row>
             <v-data-table
@@ -127,13 +132,17 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+      {{ snackbar.message }}
+    </v-snackbar>
   </v-container>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useStore } from 'vuex';
-import apiClient from '../api';
+import apiClient, { downloadExcel, uploadExcel } from '../api';
 
 const store = useStore();
 
@@ -146,6 +155,13 @@ const searchQuery = ref('');
 const editedIndex = ref(-1);
 const contractImage = ref([]);
 const imageUrl = ref('');
+const loading = ref(false);
+const excelUploadInput = ref(null);
+const snackbar = ref({
+  show: false,
+  message: '',
+  color: '',
+});
 
 const editedItem = ref({
   room_id: null,
@@ -230,6 +246,14 @@ const fetchTenants = async () => {
   }
 };
 
+const onFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    imageUrl.value = URL.createObjectURL(file);
+  } else {
+    imageUrl.value = editedItem.value.contract_image_path ? `http://localhost:3000/${editedItem.value.contract_image_path}` : '';
+  }
+};
 
 const openDialog = (item) => {
   editedIndex.value = contracts.value.indexOf(item);
@@ -253,15 +277,11 @@ const closeDialog = () => {
 const saveItem = async () => {
   try {
     const formData = new FormData();
-    
-    // Append all keys from editedItem to formData
     for (const key in editedItem.value) {
-      // Ensure that we append a value, even if it is null or empty
-      if (editedItem.value[key] !== null && editedItem.value[key] !== undefined) {
+      if (key !== 'contract_image_path') {
         formData.append(key, editedItem.value[key]);
       }
     }
-
     if (contractImage.value && contractImage.value.length > 0) {
       formData.append('contract_image', contractImage.value[0]);
     }
@@ -283,18 +303,15 @@ const saveItem = async () => {
     }
     closeDialog();
     fetchContracts(); // Refresh list
+    showSnackbar('저장되었습니다.', 'success');
   } catch (error) {
     console.error('Error saving contract:', error);
+    showSnackbar('저장 중 오류가 발생했습니다.', 'error');
   }
 };
 
-const onFileChange = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    imageUrl.value = URL.createObjectURL(file);
-  } else {
-    imageUrl.value = '';
-  }
+const editItem = (item) => {
+  openDialog(item);
 };
 
 const deleteItem = async (item) => {
@@ -302,27 +319,60 @@ const deleteItem = async (item) => {
     try {
       await apiClient.delete(`/contracts/${item.id}`);
       fetchContracts(); // Refresh list
+      showSnackbar('삭제되었습니다.', 'success');
     } catch (error) {
       console.error('Error deleting contract:', error);
+      showSnackbar('삭제 중 오류가 발생했습니다.', 'error');
     }
   }
 };
 
-const exportToExcel = () => {
-  const data = contracts.value.map(contract => ({
-    호실: contract.room ? contract.room.room_number : '',
-    임차인: contract.tenant ? contract.tenant.name : '',
-    계약시작일: contract.contract_start_date,
-    계약종료일: contract.contract_end_date,
-    월세: contract.monthly_rent,
-    보증금: contract.deposit,
-    계약상태: contract.contract_status,
-    특약사항: contract.special_terms,
-  }));
-  const ws = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '계약 목록');
-  XLSX.writeFile(wb, '계약_목록.xlsx');
+const downloadExcelData = async () => {
+  loading.value = true;
+  try {
+    const response = await downloadExcel('/contracts');
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '계약_목록.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    showSnackbar('엑셀 다운로드가 완료되었습니다.', 'success');
+  } catch (error) {
+    console.error('Error downloading excel:', error);
+    showSnackbar('엑셀 다운로드 중 오류가 발생했습니다.', 'error');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const triggerFileUpload = () => {
+  excelUploadInput.value.click();
+};
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  loading.value = true;
+  try {
+    await uploadExcel('/contracts', file);
+    showSnackbar('엑셀 업로드가 완료되었습니다.', 'success');
+    fetchContracts(); // Refresh list after upload
+  } catch (error) {
+    console.error('Error uploading excel:', error);
+    showSnackbar('엑셀 업로드 중 오류가 발생했습니다.', 'error');
+  } finally {
+    loading.value = false;
+    event.target.value = null; // Clear the input so the same file can be uploaded again
+  }
+};
+
+const showSnackbar = (message, color) => {
+  snackbar.value.message = message;
+  snackbar.value.color = color;
+  snackbar.value.show = true;
 };
 
 onMounted(() => {

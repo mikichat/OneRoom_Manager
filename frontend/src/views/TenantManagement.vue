@@ -32,6 +32,11 @@
                   @update:model-value="fetchTenants"
                 ></v-select>
               </v-col>
+              <v-col cols="12" md="3" class="d-flex justify-end align-center">
+                <v-btn color="green" dark class="mr-2" @click="downloadExcelData" :loading="loading">엑셀 다운로드</v-btn>
+                <input type="file" ref="excelUploadInput" style="display: none;" @change="handleFileUpload" accept=".xlsx, .xls" />
+                <v-btn color="blue" dark @click="triggerFileUpload" :loading="loading">엑셀 업로드</v-btn>
+              </v-col>
             </v-row>
             <v-data-table
               :headers="filteredHeaders"
@@ -101,26 +106,39 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+      {{ snackbar.message }}
+    </v-snackbar>
   </v-container>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex'; // useStore import 추가
-import apiClient from '../api';
+import { useStore } from 'vuex';
+import apiClient, { downloadExcel, uploadExcel } from '../api';
+// import * as XLSX from 'xlsx'; // Uncomment if client-side excel processing is needed
 
-const store = useStore(); // store 초기화
+const store = useStore();
 const tenants = ref([]);
 const dialog = ref(false);
 const editedIndex = ref(-1);
 const searchQuery = ref('');
-const isStudentFilter = ref(null); // null for all, true for students, false for non-students
+const isStudentFilter = ref(null);
 
 const isStudentOptions = [
   { title: '전체', value: null },
   { title: '학생', value: true },
   { title: '비학생', value: false },
 ];
+
+const loading = ref(false);
+const excelUploadInput = ref(null);
+const snackbar = ref({
+  show: false,
+  message: '',
+  color: '',
+});
 
 const editedItem = ref({
   name: '',
@@ -226,8 +244,10 @@ const saveItem = async () => {
     }
     closeDialog();
     fetchTenants(); // Refresh list
+    showSnackbar('저장되었습니다.', 'success');
   } catch (error) {
     console.error('Error saving tenant:', error);
+    showSnackbar('저장 중 오류가 발생했습니다.', 'error');
   }
 };
 
@@ -240,27 +260,60 @@ const deleteItem = async (item) => {
     try {
       await apiClient.delete(`/tenants/${item.id}`);
       fetchTenants(); // Refresh list
+      showSnackbar('삭제되었습니다.', 'success');
     } catch (error) {
       console.error('Error deleting tenant:', error);
+      showSnackbar('삭제 중 오류가 발생했습니다.', 'error');
     }
   }
 };
 
-const exportToExcel = () => {
-  const data = tenants.value.map(tenant => ({
-    이름: tenant.name,
-    전화번호: tenant.phone,
-    이메일: tenant.email,
-    생년월일: tenant.birth_first_six,
-    비상연락처: tenant.emergency_contact,
-    비상연락처이름: tenant.emergency_name,
-    학생여부: tenant.is_student ? '예' : '아니오',
-    학교이름: tenant.school_name,
-  }));
-  const ws = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '임차인 목록');
-  XLSX.writeFile(wb, '임차인_목록.xlsx');
+const downloadExcelData = async () => {
+  loading.value = true;
+  try {
+    const response = await downloadExcel('/tenants');
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '임차인_목록.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    showSnackbar('엑셀 다운로드가 완료되었습니다.', 'success');
+  } catch (error) {
+    console.error('Error downloading excel:', error);
+    showSnackbar('엑셀 다운로드 중 오류가 발생했습니다.', 'error');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const triggerFileUpload = () => {
+  excelUploadInput.value.click();
+};
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  loading.value = true;
+  try {
+    await uploadExcel('/tenants', file);
+    showSnackbar('엑셀 업로드가 완료되었습니다.', 'success');
+    fetchTenants(); // Refresh list after upload
+  } catch (error) {
+    console.error('Error uploading excel:', error);
+    showSnackbar('엑셀 업로드 중 오류가 발생했습니다.', 'error');
+  } finally {
+    loading.value = false;
+    event.target.value = null; // Clear the input so the same file can be uploaded again
+  }
+};
+
+const showSnackbar = (message, color) => {
+  snackbar.value.message = message;
+  snackbar.value.color = color;
+  snackbar.value.show = true;
 };
 
 onMounted(fetchTenants);

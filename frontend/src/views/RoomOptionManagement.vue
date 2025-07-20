@@ -20,6 +20,11 @@
                   @input="fetchRoomOptionsDebounced"
                 ></v-text-field>
               </v-col>
+              <v-col cols="12" md="6" class="d-flex justify-end align-center">
+                <v-btn color="green" dark class="mr-2" @click="downloadExcelData" :loading="loading">엑셀 다운로드</v-btn>
+                <input type="file" ref="excelUploadInput" style="display: none;" @change="handleFileUpload" accept=".xlsx, .xls" />
+                <v-btn color="blue" dark @click="triggerFileUpload" :loading="loading">엑셀 업로드</v-btn>
+              </v-col>
             </v-row>
             <v-data-table
               :headers="filteredHeaders"
@@ -32,7 +37,6 @@
                   <v-toolbar-title>방 옵션 목록</v-toolbar-title>
                   <v-divider class="mx-4" inset vertical></v-divider>
                   <v-spacer></v-spacer>
-                  <v-btn color="primary" dark class="mb-2" @click="exportToExcel">엑셀 다운로드</v-btn>
                   <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">새 방 옵션</v-btn>
                 </v-toolbar>
               </template>
@@ -128,14 +132,18 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+      {{ snackbar.message }}
+    </v-snackbar>
   </v-container>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
-import apiClient from '../api';
-import * as XLSX from 'xlsx';
+import apiClient, { downloadExcel, uploadExcel } from '../api';
+// import * as XLSX from 'xlsx'; // Uncomment if client-side excel processing is needed
 
 const store = useStore();
 
@@ -143,6 +151,14 @@ const roomOptions = ref([]);
 const dialog = ref(false);
 const editedIndex = ref(-1);
 const searchRoomId = ref('');
+
+const loading = ref(false);
+const excelUploadInput = ref(null);
+const snackbar = ref({
+  show: false,
+  message: '',
+  color: '',
+});
 
 const editedItem = ref({
   room_id: null,
@@ -252,8 +268,10 @@ const saveItem = async () => {
     }
     closeDialog();
     fetchRoomOptions(); // Refresh list
+    showSnackbar('저장되었습니다.', 'success');
   } catch (error) {
     console.error('Error saving room option:', error);
+    showSnackbar('저장 중 오류가 발생했습니다.', 'error');
   }
 };
 
@@ -266,10 +284,60 @@ const deleteItem = async (item) => {
     try {
       await apiClient.delete(`/room-options/${item.id}`);
       fetchRoomOptions(); // Refresh list
+      showSnackbar('삭제되었습니다.', 'success');
     } catch (error) {
       console.error('Error deleting room option:', error);
+      showSnackbar('삭제 중 오류가 발생했습니다.', 'error');
     }
   }
+};
+
+const downloadExcelData = async () => {
+  loading.value = true;
+  try {
+    const response = await downloadExcel('/room-options');
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '호실_옵션_목록.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    showSnackbar('엑셀 다운로드가 완료되었습니다.', 'success');
+  } catch (error) {
+    console.error('Error downloading excel:', error);
+    showSnackbar('엑셀 다운로드 중 오류가 발생했습니다.', 'error');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const triggerFileUpload = () => {
+  excelUploadInput.value.click();
+};
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  loading.value = true;
+  try {
+    await uploadExcel('/room-options', file);
+    showSnackbar('엑셀 업로드가 완료되었습니다.', 'success');
+    fetchRoomOptions(); // Refresh list after upload
+  } catch (error) {
+    console.error('Error uploading excel:', error);
+    showSnackbar('엑셀 업로드 중 오류가 발생했습니다.', 'error');
+  } finally {
+    loading.value = false;
+    event.target.value = null; // Clear the input so the same file can be uploaded again
+  }
+};
+
+const showSnackbar = (message, color) => {
+  snackbar.value.message = message;
+  snackbar.value.color = color;
+  snackbar.value.show = true;
 };
 
 onMounted(fetchRoomOptions);

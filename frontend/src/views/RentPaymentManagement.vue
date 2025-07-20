@@ -8,6 +8,14 @@
         <v-card>
           <v-card-title>임대료 납부 내역</v-card-title>
           <v-card-text>
+            <v-row class="mb-4">
+              <v-col cols="12" md="6"></v-col>
+              <v-col cols="12" md="6" class="d-flex justify-end align-center">
+                <v-btn color="green" dark class="mr-2" @click="downloadExcelData" :loading="loading">엑셀 다운로드</v-btn>
+                <input type="file" ref="excelUploadInput" style="display: none;" @change="handleFileUpload" accept=".xlsx, .xls" />
+                <v-btn color="blue" dark @click="triggerFileUpload" :loading="loading">엑셀 업로드</v-btn>
+              </v-col>
+            </v-row>
             <v-data-table
               :headers="filteredHeaders"
               :items="filteredRentPayments"
@@ -142,7 +150,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
-import apiClient from '../api';
+import apiClient, { downloadExcel, uploadExcel } from '../api';
 
 const store = useStore();
 
@@ -169,9 +177,12 @@ const defaultItem = {
   memo: '',
 };
 
-const search = ref(''); // 검색어 ref 추가
-const statusFilter = ref(null); // 상태 필터 ref 추가
-const statusOptions = ['완료', '미납', '연체']; // 상태 필터 옵션
+const search = ref('');
+const statusFilter = ref(null);
+const statusOptions = ['완료', '미납', '연체'];
+
+const loading = ref(false);
+const excelUploadInput = ref(null);
 
 const snackbar = ref({
   show: false,
@@ -180,7 +191,7 @@ const snackbar = ref({
   timeout: 3000,
 });
 
-const form = ref(null); // v-form 참조를 위한 ref
+const form = ref(null);
 
 const rules = {
   required: value => !!value || '필수 항목입니다.',
@@ -256,14 +267,25 @@ const closeDialog = () => {
   dialog.value = false;
   editedIndex.value = -1;
   editedItem.value = { ...defaultItem };
-  // 폼 유효성 검사 초기화
+  // form 유효성 초기화
   if (form.value) {
     form.value.resetValidation();
   }
 };
 
+const fetchContracts = async () => {
+  try {
+    const response = await apiClient.get('/contracts');
+    contracts.value = response.data.map(contract => ({
+      ...contract,
+      contractDisplay: `${contract.room.room_number}호 - ${contract.tenant.name}`
+    }));
+  } catch (error) {
+    console.error('Error fetching contracts:', error);
+  }
+};
+
 const saveItem = async () => {
-  // 폼 유효성 검사
   const { valid } = await form.value.validate();
   if (!valid) return;
 
@@ -271,17 +293,33 @@ const saveItem = async () => {
     if (editedIndex.value > -1) {
       // Update item
       await apiClient.put(`/rent-payments/${editedItem.value.id}`, editedItem.value);
-      snackbar.value = { show: true, message: '월세 납부 내역이 성공적으로 업데이트되었습니다.', color: 'success' };
     } else {
       // Create new item
       await apiClient.post('/rent-payments', editedItem.value);
-      snackbar.value = { show: true, message: '월세 납부 내역이 성공적으로 추가되었습니다.', color: 'success' };
     }
     closeDialog();
     fetchRentPayments(); // Refresh list
+    showSnackbar('저장되었습니다.', 'success');
   } catch (error) {
     console.error('Error saving rent payment:', error);
-    snackbar.value = { show: true, message: `월세 납부 내역 저장 중 오류가 발생했습니다: ${error.message}`, color: 'error' };
+    showSnackbar('저장 중 오류가 발생했습니다.', 'error');
+  }
+};
+
+const editItem = (item) => {
+  openDialog(item);
+};
+
+const deleteItem = async (item) => {
+  if (confirm('정말 이 납부 내역을 삭제하시겠습니까?')) {
+    try {
+      await apiClient.delete(`/rent-payments/${item.id}`);
+      fetchRentPayments(); // Refresh list
+      showSnackbar('삭제되었습니다.', 'success');
+    } catch (error) {
+      console.error('Error deleting rent payment:', error);
+      showSnackbar('삭제 중 오류가 발생했습니다.', 'error');
+    }
   }
 };
 
@@ -291,59 +329,59 @@ const fetchRentPayments = async () => {
     rentPayments.value = response.data;
   } catch (error) {
     console.error('Error fetching rent payments:', error);
-    snackbar.value = { show: true, message: `임대료 납부 내역을 가져오는 중 오류가 발생했습니다: ${error.message}`, color: 'error' };
   }
 };
 
-const fetchContracts = async () => {
+const downloadExcelData = async () => {
+  loading.value = true;
   try {
-    const response = await apiClient.get('/contracts');
-    contracts.value = response.data.map(contract => ({
-      ...contract,
-      contractDisplay: `Room ${contract.room.room_number} - ${contract.tenant.name}`
-    }));
+    const response = await downloadExcel('/rent-payments');
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '월세_납부_내역.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    showSnackbar('엑셀 다운로드가 완료되었습니다.', 'success');
   } catch (error) {
-    console.error('Error fetching contracts:', error);
-    snackbar.value = { show: true, message: `계약 목록을 가져오는 중 오류가 발생했습니다: ${error.message}`, color: 'error' };
+    console.error('Error downloading excel:', error);
+    showSnackbar('엑셀 다운로드 중 오류가 발생했습니다.', 'error');
+  } finally {
+    loading.value = false;
   }
 };
 
-const editItem = (item) => {
-  openDialog(item);
+const triggerFileUpload = () => {
+  excelUploadInput.value.click();
 };
 
-const deleteItem = async (item) => {
-  if (confirm('Are you sure you want to delete this item?')) {
-    try {
-      await apiClient.delete(`/rent-payments/${item.id}`);
-      fetchRentPayments(); // Refresh list
-      snackbar.value = { show: true, message: '월세 납부 내역이 성공적으로 삭제되었습니다.', color: 'success' };
-    } catch (error) {
-      console.error('Error deleting rent payment:', error);
-      snackbar.value = { show: true, message: `월세 납부 내역 삭제 중 오류가 발생했습니다: ${error.message}`, color: 'error' };
-    }
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  loading.value = true;
+  try {
+    await uploadExcel('/rent-payments', file);
+    showSnackbar('엑셀 업로드가 완료되었습니다.', 'success');
+    fetchRentPayments(); // Refresh list after upload
+  } catch (error) {
+    console.error('Error uploading excel:', error);
+    showSnackbar('엑셀 업로드 중 오류가 발생했습니다.', 'error');
+  } finally {
+    loading.value = false;
+    event.target.value = null; // Clear the input so the same file can be uploaded again
   }
 };
 
-const exportToExcel = () => {
-  const data = filteredRentPayments.value.map(payment => ({
-    호실: payment.contract.room ? payment.contract.room.room_number : '',
-    세입자이름: payment.contract.tenant ? payment.contract.tenant.name : '',
-    납부일: payment.payment_date,
-    금액: payment.amount,
-    납부방법: payment.payment_method,
-    납부상태: payment.payment_status,
-    납부기한: payment.due_date,
-    메모: payment.memo,
-  }));
-  const ws = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '임대료 납부 내역');
-  XLSX.writeFile(wb, '임대료_납부_내역.xlsx');
+const showSnackbar = (message, color) => {
+  snackbar.value.message = message;
+  snackbar.value.color = color;
+  snackbar.value.show = true;
 };
 
 onMounted(() => {
   fetchRentPayments();
-  fetchContracts(); // 계약 목록도 가져오도록 추가
+  fetchContracts();
 });
 </script>
