@@ -202,5 +202,23 @@ const deleteItem = async (item) => {
   }
 };
 
+const exportToExcel = () => {
+  const data = rooms.value.map(room => ({
+    건물ID: room.building_id,
+    호실번호: room.room_number,
+    층: room.floor,
+    방종류: room.room_type,
+    면적: room.area,
+    월세: room.monthly_rent,
+    보증금: room.deposit,
+    상태: room.status,
+    설명: room.description,
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '호실 목록');
+  XLSX.writeFile(wb, '호실_목록.xlsx');
+};
+
 onMounted(fetchRooms);
 </script>
