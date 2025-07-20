@@ -2,11 +2,11 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h1 class="text-h4">Contract Management</h1>
+        <h1 class="text-h4">계약 관리</h1>
       </v-col>
       <v-col cols="12">
         <v-card>
-          <v-card-title>Contracts</v-card-title>
+          <v-card-title>계약</v-card-title>
           <v-card-text>
             <v-data-table
               :headers="filteredHeaders"
@@ -16,10 +16,10 @@
             >
               <template v-slot:top>
                 <v-toolbar flat>
-                  <v-toolbar-title>Contract List</v-toolbar-title>
+                  <v-toolbar-title>계약 목록</v-toolbar-title>
                   <v-divider class="mx-4" inset vertical></v-divider>
                   <v-spacer></v-spacer>
-                  <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">New Contract</v-btn>
+                  <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">새 계약</v-btn>
                 </v-toolbar>
               </template>
               <template v-slot:item.actions="{ item }">
@@ -47,7 +47,7 @@
                   :items="rooms"
                   item-title="room_number"
                   item-value="id"
-                  label="Select Room"
+                  label="호실 선택"
                 ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6">
@@ -56,33 +56,33 @@
                   :items="tenants"
                   item-title="name"
                   item-value="id"
-                  label="Select Tenant"
+                  label="임차인 선택"
                 ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="editedItem.contract_start_date" label="Contract Start Date" type="date"></v-text-field>
+                <v-text-field v-model="editedItem.contract_start_date" label="계약 시작일" type="date"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="editedItem.contract_end_date" label="Contract End Date" type="date"></v-text-field>
+                <v-text-field v-model="editedItem.contract_end_date" label="계약 종료일" type="date"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="editedItem.monthly_rent" label="Monthly Rent" type="number"></v-text-field>
+                <v-text-field v-model="editedItem.monthly_rent" label="월세" type="number"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="editedItem.deposit" label="Deposit" type="number"></v-text-field>
+                <v-text-field v-model="editedItem.deposit" label="보증금" type="number"></v-text-field>
               </v-col>
               <v-col cols="12">
-                <v-file-input v-model="contractImage" label="Contract Image" prepend-icon="mdi-paperclip" clearable></v-file-input>
+                <v-file-input v-model="contractImage" label="계약서 이미지" prepend-icon="mdi-paperclip" clearable></v-file-input>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-select
                   v-model="editedItem.contract_status"
                   :items="['활성', '만료', '해지']"
-                  label="Contract Status"
+                  label="계약 상태"
                 ></v-select>
               </v-col>
               <v-col cols="12">
-                <v-textarea v-model="editedItem.special_terms" label="Special Terms"></v-textarea>
+                <v-textarea v-model="editedItem.special_terms" label="특약사항"></v-textarea>
               </v-col>
             </v-row>
           </v-container>
@@ -90,8 +90,8 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="saveItem">Save</v-btn>
+          <v-btn color="blue darken-1" text @click="closeDialog">취소</v-btn>
+          <v-btn color="blue darken-1" text @click="saveItem">저장</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -136,17 +136,17 @@ const defaultItem = {
 };
 
 const baseHeaders = [
-  { title: 'Room', key: 'room.room_number' },
-  { title: 'Tenant', key: 'tenant.name' },
-  { title: 'Start Date', key: 'contract_start_date' },
-  { title: 'End Date', key: 'contract_end_date' },
-  { title: 'Monthly Rent', key: 'monthly_rent' },
-  { title: 'Status', key: 'contract_status' },
+  { title: '호실', key: 'room.room_number' },
+  { title: '임차인', key: 'tenant.name' },
+  { title: '계약 시작일', key: 'contract_start_date' },
+  { title: '계약 종료일', key: 'contract_end_date' },
+  { title: '월세', key: 'monthly_rent' },
+  { title: '상태', key: 'contract_status' },
 ];
 
 const filteredHeaders = computed(() => {
   if (isAdmin.value) {
-    return [...baseHeaders, { title: 'Actions', key: 'actions', sortable: false }];
+    return [...baseHeaders, { title: '작업', key: 'actions', sortable: false }];
   } else {
     return baseHeaders;
   }
@@ -157,7 +157,7 @@ const isAdmin = computed(() => {
 });
 
 const formTitle = computed(() => {
-  return editedIndex.value === -1 ? 'New Contract' : 'Edit Contract';
+  return editedIndex.value === -1 ? '새 계약' : '계약 수정';
 });
 
 const fetchContracts = async () => {
