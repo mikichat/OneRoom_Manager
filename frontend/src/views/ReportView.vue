@@ -41,6 +41,20 @@
           </v-card-text>
         </v-card>
       </v-col>
+
+      <v-col cols="12">
+        <v-card>
+          <v-card-title>Monthly Income Chart</v-card-title>
+          <v-card-text>
+            <Bar
+              v-if="chartData.labels.length"
+              :data="chartData"
+              :options="chartOptions"
+            />
+            <v-card-text v-else>No chart data available for this year.</v-card-text>
+          </v-card-text>
+        </v-card>
+      </v-col>
     </v-row>
 
     <v-dialog v-model="detailsDialog" max-width="800px">
@@ -71,8 +85,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import apiClient from '../api';
+import { Bar } from 'vue-chartjs';
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
+
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
 const monthlyIncomeData = ref([]);
 const selectedYear = ref(new Date().getFullYear());
@@ -100,6 +118,63 @@ const detailHeaders = [
   { title: 'Payment Method', key: 'payment_method' },
   { title: 'Memo', key: 'memo' },
 ];
+
+const chartData = computed(() => {
+  const labels = monthlyIncomeData.value.map(data => data.month);
+  const data = monthlyIncomeData.value.map(data => data.total_amount);
+
+  return {
+    labels: labels,
+    datasets: [
+      {
+        label: 'Monthly Income',
+        backgroundColor: '#42A5F5',
+        data: data,
+      },
+    ],
+  };
+});
+
+const chartOptions = { // 차트 옵션 정의
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    y: {
+      beginAtZero: true,
+      title: {
+        display: true,
+        text: 'Amount (KRW)',
+      },
+      ticks: {
+        callback: function(value) {
+          return formatCurrency(value);
+        }
+      }
+    },
+    x: {
+      title: {
+        display: true,
+        text: 'Month',
+      },
+    },
+  },
+  plugins: {
+    tooltip: {
+      callbacks: {
+        label: function(context) {
+          let label = context.dataset.label || '';
+          if (label) {
+            label += ': ';
+          }
+          if (context.parsed.y !== null) {
+            label += formatCurrency(context.parsed.y);
+          }
+          return label;
+        }
+      }
+    }
+  }
+};
 
 const generateYears = () => {
   const currentYear = new Date().getFullYear();

@@ -10,7 +10,7 @@
           <v-card-text>
             <v-data-table
               :headers="filteredHeaders"
-              :items="rentPayments"
+              :items="filteredRentPayments"
               :items-per-page="5"
               class="elevation-1"
             >
@@ -24,6 +24,24 @@
                 <v-toolbar flat>
                   <v-toolbar-title>Rent Payment List</v-toolbar-title>
                   <v-divider class="mx-4" inset vertical></v-divider>
+                  <v-text-field
+                    v-model="search"
+                    label="Search"
+                    single-line
+                    hide-details
+                    density="compact"
+                    class="mx-4"
+                  ></v-text-field>
+                  <v-select
+                    v-model="statusFilter"
+                    :items="statusOptions"
+                    label="Filter by Status"
+                    clearable
+                    single-line
+                    hide-details
+                    density="compact"
+                    class="mx-4"
+                  ></v-select>
                   <v-spacer></v-spacer>
                   <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">New Rent Payment</v-btn>
                 </v-toolbar>
@@ -43,7 +61,7 @@
         <v-card-title>
           <span class="text-h5">{{ formTitle }}</span>
         </v-card-title>
-
+        <v-form ref="form">
         <v-card-text>
           <v-container>
             <v-row>
@@ -54,19 +72,30 @@
                   item-title="contractDisplay"
                   item-value="id"
                   label="Contract"
+                  :rules="[rules.required]"
                 ></v-select>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.payment_date" label="Payment Date" type="date"></v-text-field>
+                <v-text-field
+                  v-model="editedItem.payment_date"
+                  label="Payment Date"
+                  type="date"
+                  :rules="[rules.required]"
+                ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.amount" label="Amount"></v-text-field>
+                <v-text-field
+                  v-model="editedItem.amount"
+                  label="Amount"
+                  :rules="[rules.required, rules.number]"
+                ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-select
                   v-model="editedItem.payment_method"
                   :items="['현금', '계좌이체', '카드']"
                   label="Payment Method"
+                  :rules="[rules.required]"
                 ></v-select>
               </v-col>
               <v-col cols="12" sm="6" md="4">
@@ -74,10 +103,16 @@
                   v-model="editedItem.payment_status"
                   :items="['완료', '미납', '연체']"
                   label="Payment Status"
+                  :rules="[rules.required]"
                 ></v-select>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.due_date" label="Due Date" type="date"></v-text-field>
+                <v-text-field
+                  v-model="editedItem.due_date"
+                  label="Due Date"
+                  type="date"
+                  :rules="[rules.required]"
+                ></v-text-field>
               </v-col>
               <v-col cols="12">
                 <v-textarea v-model="editedItem.memo" label="Memo"></v-textarea>
@@ -92,19 +127,27 @@
           <v-btn color="blue darken-1" text @click="saveItem">Save</v-btn>
         </v-card-actions>
       </v-card>
+      </v-form>
     </v-dialog>
+
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="snackbar.timeout">
+      {{ snackbar.message }}
+      <template v-slot:actions>
+        <v-btn color="white" text @click="snackbar.show = false">Close</v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex'; // useStore import 추가
+import { useStore } from 'vuex';
 import apiClient from '../api';
 
-const store = useStore(); // store 초기화
+const store = useStore();
 
 const rentPayments = ref([]);
-const contracts = ref([]); // 계약 목록을 저장할 ref 추가
+const contracts = ref([]);
 const dialog = ref(false);
 const editedIndex = ref(-1);
 const editedItem = ref({
@@ -126,14 +169,32 @@ const defaultItem = {
   memo: '',
 };
 
+const search = ref(''); // 검색어 ref 추가
+const statusFilter = ref(null); // 상태 필터 ref 추가
+const statusOptions = ['완료', '미납', '연체']; // 상태 필터 옵션
+
+const snackbar = ref({
+  show: false,
+  message: '',
+  color: '',
+  timeout: 3000,
+});
+
+const form = ref(null); // v-form 참조를 위한 ref
+
+const rules = {
+  required: value => !!value || '필수 항목입니다.',
+  number: value => !isNaN(parseFloat(value)) && isFinite(value) || '숫자만 입력해주세요.',
+};
+
 const baseHeaders = [
-  { title: 'Room Number', key: 'contract.room.room_number' }, // 호실 번호 추가
-  { title: 'Tenant Name', key: 'contract.tenant.name' },     // 임차인 이름 추가
-  { title: 'Payment Date', key: 'payment_date' },
-  { title: 'Amount', key: 'amount' },
-  { title: 'Payment Method', key: 'payment_method' },
-  { title: 'Payment Status', key: 'payment_status' },
-  { title: 'Due Date', key: 'due_date' },
+  { title: 'Room Number', key: 'contract.room.room_number', sortable: true, filterable: true }, // 정렬 및 필터링 가능하도록 수정
+  { title: 'Tenant Name', key: 'contract.tenant.name', sortable: true, filterable: true },     // 정렬 및 필터링 가능하도록 수정
+  { title: 'Payment Date', key: 'payment_date', sortable: true },
+  { title: 'Amount', key: 'amount', sortable: true },
+  { title: 'Payment Method', key: 'payment_method', sortable: true, filterable: true },
+  { title: 'Payment Status', key: 'payment_status', sortable: true, filterable: true },
+  { title: 'Due Date', key: 'due_date', sortable: true },
 ];
 
 const filteredHeaders = computed(() => {
@@ -157,26 +218,26 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
-const fetchRentPayments = async () => {
-  try {
-    const response = await apiClient.get('/rent-payments');
-    rentPayments.value = response.data;
-  } catch (error) {
-    console.error('Error fetching rent payments:', error);
-  }
-};
+const filteredRentPayments = computed(() => {
+  let filtered = rentPayments.value;
 
-const fetchContracts = async () => {
-  try {
-    const response = await apiClient.get('/contracts');
-    contracts.value = response.data.map(contract => ({
-      ...contract,
-      contractDisplay: `Room: ${contract.room.room_number}, Tenant: ${contract.tenant.name}, Rent: ${contract.monthly_rent}`
-    }));
-  } catch (error) {
-    console.error('Error fetching contracts:', error);
+  if (statusFilter.value) {
+    filtered = filtered.filter(payment => payment.payment_status === statusFilter.value);
   }
-};
+
+  if (search.value) {
+    const searchTerm = search.value.toLowerCase();
+    filtered = filtered.filter(payment => 
+      payment.contract.room.room_number.toLowerCase().includes(searchTerm) ||
+      payment.contract.tenant.name.toLowerCase().includes(searchTerm) ||
+      payment.payment_method.toLowerCase().includes(searchTerm) ||
+      payment.payment_status.toLowerCase().includes(searchTerm) ||
+      payment.memo.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  return filtered;
+});
 
 const openDialog = (item) => {
   editedIndex.value = rentPayments.value.indexOf(item);
@@ -195,21 +256,32 @@ const closeDialog = () => {
   dialog.value = false;
   editedIndex.value = -1;
   editedItem.value = { ...defaultItem };
+  // 폼 유효성 검사 초기화
+  if (form.value) {
+    form.value.resetValidation();
+  }
 };
 
 const saveItem = async () => {
+  // 폼 유효성 검사
+  const { valid } = await form.value.validate();
+  if (!valid) return;
+
   try {
     if (editedIndex.value > -1) {
       // Update item
       await apiClient.put(`/rent-payments/${editedItem.value.id}`, editedItem.value);
+      snackbar.value = { show: true, message: '월세 납부 내역이 성공적으로 업데이트되었습니다.', color: 'success' };
     } else {
       // Create new item
       await apiClient.post('/rent-payments', editedItem.value);
+      snackbar.value = { show: true, message: '월세 납부 내역이 성공적으로 추가되었습니다.', color: 'success' };
     }
     closeDialog();
     fetchRentPayments(); // Refresh list
   } catch (error) {
     console.error('Error saving rent payment:', error);
+    snackbar.value = { show: true, message: `월세 납부 내역 저장 중 오류가 발생했습니다: ${error.message}`, color: 'error' };
   }
 };
 
@@ -222,8 +294,10 @@ const deleteItem = async (item) => {
     try {
       await apiClient.delete(`/rent-payments/${item.id}`);
       fetchRentPayments(); // Refresh list
+      snackbar.value = { show: true, message: '월세 납부 내역이 성공적으로 삭제되었습니다.', color: 'success' };
     } catch (error) {
       console.error('Error deleting rent payment:', error);
+      snackbar.value = { show: true, message: `월세 납부 내역 삭제 중 오류가 발생했습니다: ${error.message}`, color: 'error' };
     }
   }
 };
