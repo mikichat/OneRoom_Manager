@@ -126,8 +126,8 @@
           <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
           <v-btn color="blue darken-1" text @click="saveItem">Save</v-btn>
         </v-card-actions>
+        </v-form>
       </v-card>
-      </v-form>
     </v-dialog>
 
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="snackbar.timeout">
