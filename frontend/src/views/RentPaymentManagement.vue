@@ -71,14 +71,14 @@
                   :items="contracts"
                   item-title="contractDisplay"
                   item-value="id"
-                  label="Contract"
+                  label="계약"
                   :rules="[rules.required]"
                 ></v-select>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
                   v-model="editedItem.payment_date"
-                  label="Payment Date"
+                  label="납부일"
                   type="date"
                   :rules="[rules.required]"
                 ></v-text-field>
@@ -86,7 +86,7 @@
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
                   v-model="editedItem.amount"
-                  label="Amount"
+                  label="금액"
                   :rules="[rules.required, rules.number]"
                 ></v-text-field>
               </v-col>
@@ -94,7 +94,7 @@
                 <v-select
                   v-model="editedItem.payment_method"
                   :items="['현금', '계좌이체', '카드']"
-                  label="Payment Method"
+                  label="납부 방법"
                   :rules="[rules.required]"
                 ></v-select>
               </v-col>
@@ -102,20 +102,20 @@
                 <v-select
                   v-model="editedItem.payment_status"
                   :items="['완료', '미납', '연체']"
-                  label="Payment Status"
+                  label="납부 상태"
                   :rules="[rules.required]"
                 ></v-select>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
                   v-model="editedItem.due_date"
-                  label="Due Date"
+                  label="납부 기한"
                   type="date"
                   :rules="[rules.required]"
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
-                <v-textarea v-model="editedItem.memo" label="Memo"></v-textarea>
+                <v-textarea v-model="editedItem.memo" label="메모"></v-textarea>
               </v-col>
             </v-row>
           </v-container>
@@ -123,8 +123,8 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="saveItem">Save</v-btn>
+          <v-btn color="blue darken-1" text @click="closeDialog">취소</v-btn>
+          <v-btn color="blue darken-1" text @click="saveItem">저장</v-btn>
         </v-card-actions>
         </v-form>
       </v-card>
@@ -133,7 +133,7 @@
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="snackbar.timeout">
       {{ snackbar.message }}
       <template v-slot:actions>
-        <v-btn color="white" text @click="snackbar.show = false">Close</v-btn>
+        <v-btn color="white" text @click="snackbar.show = false">닫기</v-btn>
       </template>
     </v-snackbar>
   </v-container>
@@ -188,18 +188,18 @@ const rules = {
 };
 
 const baseHeaders = [
-  { title: 'Room Number', key: 'contract.room.room_number', sortable: true, filterable: true }, // 정렬 및 필터링 가능하도록 수정
-  { title: 'Tenant Name', key: 'contract.tenant.name', sortable: true, filterable: true },     // 정렬 및 필터링 가능하도록 수정
-  { title: 'Payment Date', key: 'payment_date', sortable: true },
-  { title: 'Amount', key: 'amount', sortable: true },
-  { title: 'Payment Method', key: 'payment_method', sortable: true, filterable: true },
-  { title: 'Payment Status', key: 'payment_status', sortable: true, filterable: true },
-  { title: 'Due Date', key: 'due_date', sortable: true },
+  { title: '호실', key: 'contract.room.room_number', sortable: true, filterable: true },
+  { title: '세입자 이름', key: 'contract.tenant.name', sortable: true, filterable: true },
+  { title: '납부일', key: 'payment_date', sortable: true },
+  { title: '금액', key: 'amount', sortable: true },
+  { title: '납부 방법', key: 'payment_method', sortable: true, filterable: true },
+  { title: '납부 상태', key: 'payment_status', sortable: true, filterable: true },
+  { title: '납부 기한', key: 'due_date', sortable: true },
 ];
 
 const filteredHeaders = computed(() => {
   if (isAdmin.value) {
-    return [...baseHeaders, { title: 'Actions', key: 'actions', sortable: false }];
+    return [...baseHeaders, { title: '작업', key: 'actions', sortable: false }];
   } else {
     return baseHeaders;
   }
@@ -210,7 +210,7 @@ const isAdmin = computed(() => {
 });
 
 const formTitle = computed(() => {
-  return editedIndex.value === -1 ? 'New Rent Payment' : 'Edit Rent Payment';
+  return editedIndex.value === -1 ? '새 임대료 납부' : '임대료 납부 수정';
 });
 
 const formatDate = (dateString) => {
