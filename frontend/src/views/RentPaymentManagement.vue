@@ -2,11 +2,11 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h1 class="text-h4">Rent Payment Management</h1>
+        <h1 class="text-h4">임대료 납부 관리</h1>
       </v-col>
       <v-col cols="12">
         <v-card>
-          <v-card-title>Rent Payments</v-card-title>
+          <v-card-title>임대료 납부 내역</v-card-title>
           <v-card-text>
             <v-data-table
               :headers="filteredHeaders"
@@ -22,11 +22,11 @@
               </template>
               <template v-slot:top>
                 <v-toolbar flat>
-                  <v-toolbar-title>Rent Payment List</v-toolbar-title>
+                  <v-toolbar-title>임대료 납부 목록</v-toolbar-title>
                   <v-divider class="mx-4" inset vertical></v-divider>
                   <v-text-field
                     v-model="search"
-                    label="Search"
+                    label="검색"
                     single-line
                     hide-details
                     density="compact"
@@ -35,7 +35,7 @@
                   <v-select
                     v-model="statusFilter"
                     :items="statusOptions"
-                    label="Filter by Status"
+                    label="상태별 필터"
                     clearable
                     single-line
                     hide-details
@@ -43,7 +43,7 @@
                     class="mx-4"
                   ></v-select>
                   <v-spacer></v-spacer>
-                  <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">New Rent Payment</v-btn>
+                  <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">새 임대료 납부</v-btn>
                 </v-toolbar>
               </template>
               <template v-slot:item.actions="{ item }">
