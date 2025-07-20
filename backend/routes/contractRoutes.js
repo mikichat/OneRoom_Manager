@@ -10,4 +10,8 @@ router.get('/:id', protect, contractController.getContractById);
 router.put('/:id', protect, authorizeRoles('admin'), upload.single('contract_image'), contractController.updateContract);
 router.delete('/:id', protect, authorizeRoles('admin'), contractController.deleteContract);
 
+// Excel routes
+router.get('/excel/download', protect, authorizeRoles('admin'), contractController.downloadContractsExcel);
+router.post('/excel/upload', protect, authorizeRoles('admin'), upload.single('file'), contractController.uploadContractsExcel);
+
 module.exports = router;
