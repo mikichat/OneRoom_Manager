@@ -2,6 +2,8 @@
 const {
   Model
 } = require('sequelize');
+const { encrypt, decrypt } = require('../utils/cryptoUtils'); // cryptoUtils import
+
 module.exports = (sequelize, DataTypes) => {
   class Tenant extends Model {
     /**
@@ -20,15 +22,33 @@ module.exports = (sequelize, DataTypes) => {
   Tenant.init({
     name: {
       type: DataTypes.STRING(50),
-      allowNull: false
+      allowNull: false,
+      set(value) {
+        this.setDataValue('name', encrypt(value));
+      },
+      get() {
+        return decrypt(this.getDataValue('name'));
+      }
     },
     phone: {
       type: DataTypes.STRING(20),
       allowNull: false,
-      unique: true
+      unique: true,
+      set(value) {
+        this.setDataValue('phone', encrypt(value));
+      },
+      get() {
+        return decrypt(this.getDataValue('phone'));
+      }
     },
     email: {
-      type: DataTypes.STRING(100)
+      type: DataTypes.STRING(100),
+      set(value) {
+        this.setDataValue('email', encrypt(value));
+      },
+      get() {
+        return decrypt(this.getDataValue('email'));
+      }
     },
     birth_first_six: {
       type: DataTypes.STRING(6)
