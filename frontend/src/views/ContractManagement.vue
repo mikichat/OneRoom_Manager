@@ -308,6 +308,23 @@ const deleteItem = async (item) => {
   }
 };
 
+const exportToExcel = () => {
+  const data = contracts.value.map(contract => ({
+    호실: contract.room ? contract.room.room_number : '',
+    임차인: contract.tenant ? contract.tenant.name : '',
+    계약시작일: contract.contract_start_date,
+    계약종료일: contract.contract_end_date,
+    월세: contract.monthly_rent,
+    보증금: contract.deposit,
+    계약상태: contract.contract_status,
+    특약사항: contract.special_terms,
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '계약 목록');
+  XLSX.writeFile(wb, '계약_목록.xlsx');
+};
+
 onMounted(() => {
   fetchContracts();
   fetchRooms();
