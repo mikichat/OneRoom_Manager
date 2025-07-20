@@ -13,7 +13,12 @@ let sequelize;
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  // SQLite의 경우 storage만 사용
+  sequelize = new Sequelize({
+    dialect: config.dialect,
+    storage: config.storage,
+    logging: config.logging // config에서 logging 설정 가져오기
+  });
 }
 
 fs
