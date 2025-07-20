@@ -2,17 +2,17 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h1 class="text-h4">Dashboard</h1>
+        <h1 class="text-h4">대시보드</h1>
       </v-col>
 
       <v-col cols="12" md="4">
         <v-card class="d-flex flex-column align-center justify-center pa-4 text-center">
           <v-icon size="60" color="blue">mdi-home-city</v-icon>
-          <v-card-title class="text-h5 mt-2">Room Status</v-card-title>
+          <v-card-title class="text-h5 mt-2">호실 현황</v-card-title>
           <v-card-text>
-            <p class="text-h6">Total: {{ dashboardSummary.totalRooms }}</p>
-            <p class="text-h6">Rented: {{ dashboardSummary.rentedRooms }}</p>
-            <p class="text-h6">Available: {{ dashboardSummary.availableRooms }}</p>
+            <p class="text-h6">전체: {{ dashboardSummary.totalRooms }}</p>
+            <p class="text-h6">임대중: {{ dashboardSummary.rentedRooms }}</p>
+            <p class="text-h6">공실: {{ dashboardSummary.availableRooms }}</p>
           </v-card-text>
         </v-card>
       </v-col>
@@ -20,28 +20,28 @@
       <v-col cols="12" md="4">
         <v-card class="d-flex flex-column align-center justify-center pa-4 text-center">
           <v-icon size="60" color="green">mdi-cash-multiple</v-icon>
-          <v-card-title class="text-h5 mt-2">Monthly Revenue</v-card-title>
+          <v-card-title class="text-h5 mt-2">이번 달 수입</v-card-title>
           <v-card-text>
             <p class="text-h4 font-weight-bold">{{ formatCurrency(dashboardSummary.paidThisMonth) }}</p>
-            <p class="text-subtitle-1">Paid This Month</p>
+            <p class="text-subtitle-1">이번 달 납부 완료 금액</p>
           </v-card-text>
         </v-card>
       </v-col>
 
       <v-col cols="12" md="4">
         <v-card>
-          <v-card-title class="d-flex align-center"><v-icon left>mdi-calendar-alert</v-icon> Expiring Contracts (Next Month)</v-card-title>
+          <v-card-title class="d-flex align-center"><v-icon left>mdi-calendar-alert</v-icon> 계약 만료 예정 (다음 달)</v-card-title>
           <v-card-text>
             <v-list dense>
               <v-list-item v-for="contract in dashboardSummary.expiringContracts" :key="contract.id">
                 <v-list-item-content>
                   <v-list-item-title class="font-weight-medium">{{ contract.room.room_number }} - {{ contract.tenant.name }}</v-list-item-title>
-                  <v-list-item-subtitle>Ends: {{ formatDate(contract.contract_end_date) }}</v-list-item-subtitle>
+                  <v-list-item-subtitle>만료일: {{ formatDate(contract.contract_end_date) }}</v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
               <v-list-item v-if="dashboardSummary.expiringContracts && dashboardSummary.expiringContracts.length === 0">
                 <v-list-item-content>
-                  <v-list-item-title class="text-caption">No expiring contracts next month.</v-list-item-title>
+                  <v-list-item-title class="text-caption">다음 달에 만료되는 계약이 없습니다.</v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
             </v-list>
@@ -51,18 +51,18 @@
 
       <v-col cols="12">
         <v-card>
-          <v-card-title class="d-flex align-center"><v-icon left>mdi-alert-octagon</v-icon> Overdue Payments</v-card-title>
+          <v-card-title class="d-flex align-center"><v-icon left>mdi-alert-octagon</v-icon> 연체된 납부</v-card-title>
           <v-card-text>
             <v-list dense>
               <v-list-item v-for="payment in dashboardSummary.overduePayments" :key="payment.id">
                 <v-list-item-content>
                   <v-list-item-title class="font-weight-medium">{{ payment.contract.room.room_number }} - {{ payment.contract.tenant.name }}</v-list-item-title>
-                  <v-list-item-subtitle>Due: {{ formatDate(payment.due_date) }} - Amount: {{ formatCurrency(payment.amount) }}</v-list-item-subtitle>
+                  <v-list-item-subtitle>납부기한: {{ formatDate(payment.due_date) }} - 금액: {{ formatCurrency(payment.amount) }}</v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
               <v-list-item v-if="dashboardSummary.overduePayments && dashboardSummary.overduePayments.length === 0">
                 <v-list-item-content>
-                  <v-list-item-title class="text-caption">No overdue payments.</v-list-item-title>
+                  <v-list-item-title class="text-caption">연체된 납부 내역이 없습니다.</v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
             </v-list>
@@ -72,18 +72,18 @@
 
       <v-col cols="12">
         <v-card>
-          <v-card-title class="d-flex align-center"><v-icon left>mdi-clock-outline</v-icon> Upcoming Payments</v-card-title>
+          <v-card-title class="d-flex align-center"><v-icon left>mdi-clock-outline</v-icon> 예정된 납부</v-card-title>
           <v-card-text>
             <v-list dense>
               <v-list-item v-for="payment in dashboardSummary.upcomingPayments" :key="payment.id">
                 <v-list-item-content>
                   <v-list-item-title class="font-weight-medium">{{ payment.contract.room.room_number }} - {{ payment.contract.tenant.name }}</v-list-item-title>
-                  <v-list-item-subtitle>Due: {{ formatDate(payment.due_date) }} - Amount: {{ formatCurrency(payment.amount) }}</v-list-item-subtitle>
+                  <v-list-item-subtitle>납부기한: {{ formatDate(payment.due_date) }} - 금액: {{ formatCurrency(payment.amount) }}</v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
               <v-list-item v-if="dashboardSummary.upcomingPayments && dashboardSummary.upcomingPayments.length === 0">
                 <v-list-item-content>
-                  <v-list-item-title class="text-caption">No upcoming payments.</v-list-item-title>
+                  <v-list-item-title class="text-caption">예정된 납부 내역이 없습니다.</v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
             </v-list>
@@ -93,11 +93,11 @@
 
       <v-col cols="12">
         <v-card>
-          <v-card-title>Monthly Income (Last 12 Months)</v-card-title>
+          <v-card-title>월별 수입 (지난 12개월)</v-card-title>
           <v-card-text>
             <div style="height: 400px">
               <Bar :data="chartData" :options="chartOptions" v-if="chartData.datasets.length > 0" />
-              <p v-else>No monthly income data available.</p>
+              <p v-else>월별 수입 데이터가 없습니다.</p>
             </div>
           </v-card-text>
         </v-card>
@@ -161,7 +161,7 @@ const chartData = computed(() => {
     labels: labels,
     datasets: [
       {
-        label: 'Monthly Income',
+        label: '월별 수입',
         backgroundColor: '#42A5F5',
         data: data,
       },
@@ -177,7 +177,7 @@ const chartOptions = { // 차트 옵션 정의
       beginAtZero: true,
       title: {
         display: true,
-        text: 'Amount (KRW)',
+        text: '금액 (원)',
       },
       ticks: {
         callback: function(value) {
@@ -188,7 +188,7 @@ const chartOptions = { // 차트 옵션 정의
     x: {
       title: {
         display: true,
-        text: 'Month',
+        text: '월',
       },
     },
   },

@@ -2,11 +2,11 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h1 class="text-h4">Room Management</h1>
+        <h1 class="text-h4">호실 관리</h1>
       </v-col>
       <v-col cols="12">
         <v-card>
-          <v-card-title>Rooms</v-card-title>
+          <v-card-title>호실</v-card-title>
           <v-card-text>
             <v-data-table
               :headers="filteredHeaders"
@@ -16,10 +16,10 @@
             >
               <template v-slot:top>
                 <v-toolbar flat>
-                  <v-toolbar-title>Room List</v-toolbar-title>
+                  <v-toolbar-title>호실 목록</v-toolbar-title>
                   <v-divider class="mx-4" inset vertical></v-divider>
                   <v-spacer></v-spacer>
-                  <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">New Room</v-btn>
+                  <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">새 호실</v-btn>
                 </v-toolbar>
               </template>
               <template v-slot:item.actions="{ item }">
@@ -42,39 +42,39 @@
           <v-container>
             <v-row>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.building_id" label="Building ID"></v-text-field>
+                <v-text-field v-model="editedItem.building_id" label="건물 ID"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.room_number" label="Room Number"></v-text-field>
+                <v-text-field v-model="editedItem.room_number" label="호실 번호"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.floor" label="Floor"></v-text-field>
+                <v-text-field v-model="editedItem.floor" label="층"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-select
                   v-model="editedItem.room_type"
                   :items="['1룸', '2룸']"
-                  label="Room Type"
+                  label="방 종류"
                 ></v-select>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.area" label="Area"></v-text-field>
+                <v-text-field v-model="editedItem.area" label="면적"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.monthly_rent" label="Monthly Rent"></v-text-field>
+                <v-text-field v-model="editedItem.monthly_rent" label="월세"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.deposit" label="Deposit"></v-text-field>
+                <v-text-field v-model="editedItem.deposit" label="보증금"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-select
                   v-model="editedItem.status"
                   :items="['임대가능', '임대중', '수리중']"
-                  label="Status"
+                  label="상태"
                 ></v-select>
               </v-col>
               <v-col cols="12">
-                <v-textarea v-model="editedItem.description" label="Description"></v-textarea>
+                <v-textarea v-model="editedItem.description" label="설명"></v-textarea>
               </v-col>
             </v-row>
           </v-container>
@@ -82,8 +82,8 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="saveItem">Save</v-btn>
+          <v-btn color="blue darken-1" text @click="closeDialog">취소</v-btn>
+          <v-btn color="blue darken-1" text @click="saveItem">저장</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -124,19 +124,19 @@ const defaultItem = {
 };
 
 const baseHeaders = [
-  { title: 'Building ID', key: 'building_id' },
-  { title: 'Room Number', key: 'room_number' },
-  { title: 'Floor', key: 'floor' },
-  { title: 'Room Type', key: 'room_type' },
-  { title: 'Area', key: 'area' },
-  { title: 'Monthly Rent', key: 'monthly_rent' },
-  { title: 'Deposit', key: 'deposit' },
-  { title: 'Status', key: 'status' },
+  { title: '건물 ID', key: 'building_id' },
+  { title: '호실 번호', key: 'room_number' },
+  { title: '층', key: 'floor' },
+  { title: '방 종류', key: 'room_type' },
+  { title: '면적', key: 'area' },
+  { title: '월세', key: 'monthly_rent' },
+  { title: '보증금', key: 'deposit' },
+  { title: '상태', key: 'status' },
 ];
 
 const filteredHeaders = computed(() => {
   if (isAdmin.value) {
-    return [...baseHeaders, { title: 'Actions', key: 'actions', sortable: false }];
+    return [...baseHeaders, { title: '작업', key: 'actions', sortable: false }];
   } else {
     return baseHeaders;
   }
@@ -147,7 +147,7 @@ const isAdmin = computed(() => {
 });
 
 const formTitle = computed(() => {
-  return editedIndex.value === -1 ? 'New Room' : 'Edit Room';
+  return editedIndex.value === -1 ? '새 호실' : '호실 수정';
 });
 
 const fetchRooms = async () => {

@@ -2,17 +2,17 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <h1 class="text-h4">Tenant Management</h1>
+        <h1 class="text-h4">임차인 관리</h1>
       </v-col>
       <v-col cols="12">
         <v-card>
-          <v-card-title>Tenants</v-card-title>
+          <v-card-title>임차인</v-card-title>
           <v-card-text>
             <v-row class="mb-4">
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model="searchQuery"
-                  label="Search by Name, Phone, or Email"
+                  label="이름, 전화번호, 또는 이메일로 검색"
                   clearable
                   density="compact"
                   hide-details
@@ -24,7 +24,7 @@
                 <v-select
                   v-model="isStudentFilter"
                   :items="isStudentOptions"
-                  label="Student Status"
+                  label="학생 여부"
                   clearable
                   density="compact"
                   hide-details
@@ -41,10 +41,10 @@
             >
               <template v-slot:top>
                 <v-toolbar flat>
-                  <v-toolbar-title>Tenant List</v-toolbar-title>
+                  <v-toolbar-title>임차인 목록</v-toolbar-title>
                   <v-divider class="mx-4" inset vertical></v-divider>
                   <v-spacer></v-spacer>
-                  <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">New Tenant</v-btn>
+                  <v-btn v-if="isAdmin" color="primary" dark class="mb-2" @click="openDialog()">새 임차인</v-btn>
                 </v-toolbar>
               </template>
               <template v-slot:item.actions="{ item }">
@@ -67,28 +67,28 @@
           <v-container>
             <v-row>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.name" label="Name"></v-text-field>
+                <v-text-field v-model="editedItem.name" label="이름"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.phone" label="Phone"></v-text-field>
+                <v-text-field v-model="editedItem.phone" label="전화번호"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.email" label="Email"></v-text-field>
+                <v-text-field v-model="editedItem.email" label="이메일"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.birth_first_six" label="Birth First Six"></v-text-field>
+                <v-text-field v-model="editedItem.birth_first_six" label="생년월일 (앞 6자리)"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.emergency_contact" label="Emergency Contact"></v-text-field>
+                <v-text-field v-model="editedItem.emergency_contact" label="비상 연락처"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.emergency_name" label="Emergency Name"></v-text-field>
+                <v-text-field v-model="editedItem.emergency_name" label="비상 연락처 이름"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-checkbox v-model="editedItem.is_student" label="Is Student"></v-checkbox>
+                <v-checkbox v-model="editedItem.is_student" label="학생 여부"></v-checkbox>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field v-model="editedItem.school_name" label="School Name"></v-text-field>
+                <v-text-field v-model="editedItem.school_name" label="학교 이름"></v-text-field>
               </v-col>
             </v-row>
           </v-container>
@@ -96,8 +96,8 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="saveItem">Save</v-btn>
+          <v-btn color="blue darken-1" text @click="closeDialog">취소</v-btn>
+          <v-btn color="blue darken-1" text @click="saveItem">저장</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -117,9 +117,9 @@ const searchQuery = ref('');
 const isStudentFilter = ref(null); // null for all, true for students, false for non-students
 
 const isStudentOptions = [
-  { title: 'All', value: null },
-  { title: 'Student', value: true },
-  { title: 'Not Student', value: false },
+  { title: '전체', value: null },
+  { title: '학생', value: true },
+  { title: '비학생', value: false },
 ];
 
 const editedItem = ref({
@@ -144,16 +144,16 @@ const defaultItem = {
 };
 
 const baseHeaders = [
-  { title: 'Name', key: 'name' },
-  { title: 'Phone', key: 'phone' },
-  { title: 'Email', key: 'email' },
-  { title: 'Is Student', key: 'is_student' },
-  { title: 'School Name', key: 'school_name' },
+  { title: '이름', key: 'name' },
+  { title: '전화번호', key: 'phone' },
+  { title: '이메일', key: 'email' },
+  { title: '학생 여부', key: 'is_student' },
+  { title: '학교 이름', key: 'school_name' },
 ];
 
 const headers = computed(() => {
   if (isAdmin.value) {
-    return [...baseHeaders, { title: 'Actions', key: 'actions', sortable: false }];
+    return [...baseHeaders, { title: '작업', key: 'actions', sortable: false }];
   } else {
     return baseHeaders;
   }
@@ -173,7 +173,7 @@ const isAdmin = computed(() => {
 });
 
 const formTitle = computed(() => {
-  return editedIndex.value === -1 ? 'New Tenant' : 'Edit Tenant';
+  return editedIndex.value === -1 ? '새 임차인' : '임차인 수정';
 });
 
 let debounceTimeout = null;
