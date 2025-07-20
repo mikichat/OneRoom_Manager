@@ -49,6 +49,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Tenant',
+    timestamps: true, // createdAt 및 updatedAt 자동 관리를 위해 추가
+    underscored: true // created_at 및 updated_at 컬럼 매핑을 위해 추가
   });
   return Tenant;
 };
