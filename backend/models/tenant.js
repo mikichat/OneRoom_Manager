@@ -54,10 +54,22 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(6)
     },
     emergency_contact: {
-      type: DataTypes.STRING(20)
+      type: DataTypes.STRING(20),
+      set(value) {
+        this.setDataValue('emergency_contact', encrypt(value));
+      },
+      get() {
+        return decrypt(this.getDataValue('emergency_contact'));
+      }
     },
     emergency_name: {
-      type: DataTypes.STRING(50)
+      type: DataTypes.STRING(50),
+      set(value) {
+        this.setDataValue('emergency_name', encrypt(value));
+      },
+      get() {
+        return decrypt(this.getDataValue('emergency_name'));
+      }
     },
     is_student: {
       type: DataTypes.BOOLEAN,
