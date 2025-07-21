@@ -22,7 +22,8 @@ const upload = multer({
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'application/vnd.ms-excel',
-      'application/haansoftxls'
+      'application/haansoftxls',
+      'application/haansoftxlsx'
     ];
 
     const mimetypeCheck = mimetypes.includes(file.mimetype);
