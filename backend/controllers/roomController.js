@@ -221,11 +221,20 @@ exports.uploadRoomsExcel = async (req, res) => {
 
     for (const { roomData, roomOptionData } of roomsToProcess) {
       if (roomData.id) {
-        // Update existing room
-        await Room.update(roomData, { where: { id: roomData.id } });
-        await RoomOption.update(roomOptionData, { where: { room_id: roomData.id } });
+        // 기존 방이 실제로 존재하는지 확인
+        const existingRoom = await Room.findByPk(roomData.id);
+        if (existingRoom) {
+          // 기존 방 업데이트
+          await Room.update(roomData, { where: { id: roomData.id } });
+          await RoomOption.update(roomOptionData, { where: { room_id: roomData.id } });
+        } else {
+          // ID가 있지만 존재하지 않는 방 -> 새로 생성 (ID 제외)
+          const { id, ...newRoomData } = roomData;
+          const newRoom = await Room.create(newRoomData);
+          await RoomOption.create({ ...roomOptionData, room_id: newRoom.id });
+        }
       } else {
-        // Create new room and options
+        // ID가 없는 새 방 생성
         const newRoom = await Room.create(roomData);
         await RoomOption.create({ ...roomOptionData, room_id: newRoom.id });
       }
