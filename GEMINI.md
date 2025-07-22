@@ -1,12 +1,12 @@
 # Gemini Project Configuration
 
 ## 1. 기본 지침
-- 항상 한국어로 응답합니다.
-- 개발 환경은 Windows입니다.
-- 단계별로 생각하고 계획을 세운 후 작업을 수행합니다.
-- 파일 수정 전에는 항상 `git pull`을 실행하여 원격 저장소의 최신 변경사항을 먼저 반영합니다.
-- 파일 추가 및 수정 후에는 항상 `git add .`, `git commit`, `git push`를 수행합니다.
-- 커밋 메시지는 한글로 작성하며, `commit_message.txt` 파일을 `utf-8`로 생성하여 사용하고 커밋 후에는 `del commit_message.txt` 명령으로 삭제합니다.
+It always responds in Korean.
+The development environment is Windows.
+Think step by step, make a plan, and then do the work.
+Before modifying a file, run "git pull" to get the latest changes from the remote repository.
+Always perform "git add .", "git commit", and "git push" after adding and modifying files.
+The commit message is written in Korean and created by making a commit_message.txt file in utf-8 and deleting it with the del commit_message.txt command after committing.
 
 ## 2. 프로젝트 개요
 이 프로젝트는 **원룸 관리 애플리케이션**입니다. Vue.js 기반의 프론트엔드와 Node.js/Express 기반의 백엔드로 구성되어 있습니다.
