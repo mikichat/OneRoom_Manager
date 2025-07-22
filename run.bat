@@ -1,8 +1,11 @@
 @echo off
 
-echo Creating logs directory if it does not exist...
+echo Clearing old logs and creating logs directory...
 cd backend
-mkdir logs >nul 2>nul
+if exist logs (
+  rmdir /s /q logs
+)
+mkdir logs
 cd ..
 
 echo Starting backend...
