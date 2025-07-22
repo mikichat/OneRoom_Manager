@@ -56,11 +56,13 @@ const reportRoutes = require('./routes/reportRoutes');
 const roomOptionRoutes = require('./routes/roomOptionRoutes');
 const seedRoutes = require('./routes/seedRoutes'); // 새로 추가
 
+// 1. 기본 미들웨어 설정
+app.use(cors()); // CORS 미들웨어 추가
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(cors()); // CORS 미들웨어 추가
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// 2. API 라우트 설정
 app.get('/', (req, res) => {
   res.send('Hello, OneRoom Manager!');
 });
@@ -77,6 +79,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/room-options', roomOptionRoutes);
 app.use('/api', seedRoutes); // 새로 추가
 
+// 3. Cron-Jobs 및 서버 리스닝
 const setupCronJobs = require('./cronJobs');
 
 app.listen(port, () => {

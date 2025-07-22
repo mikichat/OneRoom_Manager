@@ -1,1 +1,1 @@
-feat: access.log에 쿼리 정보 추가
+fix: 미들웨어 및 라우터 순서 조정
