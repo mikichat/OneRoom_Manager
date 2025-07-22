@@ -148,7 +148,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useStore } from 'vuex';
 import apiClient, { downloadExcel, uploadExcel } from '../api';
 // import * as XLSX from 'xlsx'; // Uncomment if client-side excel processing is needed
@@ -246,16 +246,20 @@ const rooms = ref([]);
 const fetchRooms = async () => {
   try {
     const response = await apiClient.get('/rooms'); // /api/rooms 엔드포인트 사용
-    // 중복된 room_id를 가진 객체 제거
-    const uniqueRooms = [];
-    const roomIds = new Set();
+    
+    // 현재 roomOptions에 있는 room_id들을 Set으로 만듭니다.
+    const existingRoomOptionIds = new Set(roomOptions.value.map(option => option.room_id));
+
+    // 중복된 room_id를 가진 객체 제거 및 이미 옵션이 있는 호실 제외
+    const uniqueAndAvailableRooms = [];
+    const roomIds = new Set(); // fetchRooms 내부의 중복 제거용
     response.data.forEach(room => {
-      if (!roomIds.has(room.id)) {
-        uniqueRooms.push(room);
+      if (!roomIds.has(room.id) && !existingRoomOptionIds.has(room.id)) {
+        uniqueAndAvailableRooms.push(room);
         roomIds.add(room.id);
       }
     });
-    rooms.value = uniqueRooms;
+    rooms.value = uniqueAndAvailableRooms;
   } catch (error) {
     console.error('Error fetching rooms:', error);
   }
@@ -271,10 +275,17 @@ const openDialog = (item) => {
 
   // Convert boolean values from backend to be compatible with v-checkbox
   for (const key in editedItem.value) {
-    if (typeof editedItem.value[key] === 'number') {
+    // room_id 필드는 변환 대상에서 제외
+    if (key !== 'room_id' && typeof editedItem.value[key] === 'number') {
       editedItem.value[key] = !!editedItem.value[key];
     }
   }
+
+  // 추가: nextTick을 사용하여 v-select 업데이트 강제
+  nextTick(() => {
+    console.log('nextTick: editedItem.room_id after DOM update:', editedItem.value.room_id);
+  });
+
   dialog.value = true;
 };
 
@@ -296,8 +307,8 @@ const saveItem = async () => {
 
     if (editedIndex.value > -1) {
       // Update item
-      console.log('itemToSave.id:', itemToSave.id);
-      await apiClient.put(`/room-options/${itemToSave.id}`, itemToSave);
+      console.log('itemToSave.id:', itemToSave.id); // 이 로그는 이제 room_id를 확인하는 용도로 변경
+      await apiClient.put(`/room-options/${itemToSave.room_id}`, itemToSave); // room_id 사용
     } else {
       // Create new item
       await apiClient.post('/room-options', itemToSave);
@@ -388,8 +399,8 @@ const showSnackbar = (message, color) => {
   snackbar.value.show = true;
 };
 
-onMounted(() => {
-  fetchRoomOptions();
-  fetchRooms(); // 호실 목록 가져오기
+onMounted(async () => { // async 추가
+  await fetchRoomOptions(); // 먼저 방 옵션 목록을 가져옵니다.
+  fetchRooms(); // 그 후에 호실 목록을 가져옵니다.
 });
 </script>

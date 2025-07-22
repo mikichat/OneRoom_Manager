@@ -42,18 +42,44 @@ exports.getAllRoomOptions = async (req, res) => {
     const { room_id } = req.query;
     const where = {};
     if (room_id) {
-      where.room_id = room_id;
+      where.id = room_id; // Room 모델의 id를 기준으로 필터링
     }
-    const roomOptions = await RoomOption.findAll({
+
+    const roomsWithRoomOptions = await Room.findAll({
       where,
       include: [{
-        model: Room,
-        as: 'room',
-        attributes: ['id', 'room_number', 'building_id']
+        model: RoomOption,
+        as: 'room_option', // Room 모델에 RoomOption이 포함될 때 사용되는 별칭
+        required: false // LEFT JOIN을 위해 false로 설정
       }]
     });
-    res.status(200).json(roomOptions);
+
+    // RoomOption이 없는 경우 기본값 설정
+    const formattedRoomOptions = roomsWithRoomOptions.map(room => {
+      const roomOptionData = room.room_option ? room.room_option.toJSON() : {};
+      return {
+        id: roomOptionData.id || null, // RoomOption의 ID, 없으면 null
+        room_id: room.id, // Room의 ID
+        room: {
+          id: room.id,
+          room_number: room.room_number,
+          building_id: room.building_id
+        },
+        refrigerator: roomOptionData.refrigerator || false,
+        washing_machine: roomOptionData.washing_machine || false,
+        air_conditioner: roomOptionData.air_conditioner || false,
+        induction: roomOptionData.induction || false,
+        microwave: roomOptionData.microwave || false,
+        tv: roomOptionData.tv || false,
+        wifi_router: roomOptionData.wifi_router || false,
+        createdAt: roomOptionData.createdAt || room.createdAt,
+        updatedAt: roomOptionData.updatedAt || room.updatedAt,
+      };
+    });
+
+    res.status(200).json(formattedRoomOptions);
   } catch (error) {
+    global.debugLog(`Error in getAllRoomOptions: ${error.message}`); // 로그 추가
     res.status(500).json({ error: error.message });
   }
 };
@@ -81,40 +107,52 @@ exports.getRoomOptionById = async (req, res) => {
 
 // Update a RoomOption
 exports.updateRoomOption = async (req, res) => {
-  global.debugLog(`Updating room option with id: ${req.params.id}`);
+  global.debugLog(`Updating room option with room_id: ${req.params.id}`); // req.params.id를 room_id로 간주
   global.debugLog(`Request body: ${JSON.stringify(req.body)}`);
   try {
-    const { id } = req.params;
+    const roomId = req.params.id; // URL 파라미터를 room_id로 사용
+    const { id, ...updateData } = req.body; // body에서 id는 제거 (RoomOption의 id)
 
-    // 추가: 해당 ID의 RoomOption이 존재하는지 확인
-    const existingRoomOption = await RoomOption.findByPk(id);
-    if (!existingRoomOption) {
-      global.debugLog(`Room option with id ${id} not found before update attempt.`);
-      return res.status(404).json({ message: 'Room option not found' });
-    }
-    global.debugLog(`Found existing room option: ${JSON.stringify(existingRoomOption.toJSON())}`);
+    // 해당 room_id를 가진 RoomOption이 있는지 확인
+    let existingRoomOption = await RoomOption.findOne({ where: { room_id: roomId } });
 
-    const [updated] = await RoomOption.update(req.body, {
-      where: { id: id }
-    });
-    if (updated) {
-      const updatedRoomOption = await RoomOption.findByPk(id, {
+    if (existingRoomOption) {
+      // RoomOption이 존재하면 업데이트
+      const [updated] = await RoomOption.update(updateData, {
+        where: { room_id: roomId }
+      });
+
+      if (updated) {
+        const updatedRoomOption = await RoomOption.findOne({
+          where: { room_id: roomId },
+          include: [{
+            model: Room,
+            as: 'room',
+            attributes: ['id', 'room_number', 'building_id']
+          }]
+        });
+        global.debugLog(`Successfully updated room option: ${JSON.stringify(updatedRoomOption.toJSON())}`);
+        res.status(200).json(updatedRoomOption);
+      } else {
+        // 업데이트할 데이터가 기존과 동일하여 updated가 0일 수 있습니다.
+        global.debugLog(`Room option with room_id ${roomId} not updated (no changes).`);
+        res.status(200).json(existingRoomOption); // 변경사항이 없어도 200 OK 반환
+      }
+    } else {
+      // RoomOption이 없으면 새로 생성
+      const newRoomOption = await RoomOption.create({ ...updateData, room_id: roomId });
+      global.debugLog(`Successfully created new room option for room_id ${roomId}: ${JSON.stringify(newRoomOption.toJSON())}`);
+      const createdRoomOptionWithRoom = await RoomOption.findByPk(newRoomOption.id, {
         include: [{
           model: Room,
           as: 'room',
           attributes: ['id', 'room_number', 'building_id']
         }]
       });
-      global.debugLog(`Successfully updated room option: ${JSON.stringify(updatedRoomOption.toJSON())}`);
-      res.status(200).json(updatedRoomOption);
-    } else {
-      // 이 경우는 업데이트할 데이터가 기존과 동일하여 updated가 0일 수 있습니다.
-      // 하지만 프론트에서 'Room option not found' 에러를 받았으므로,
-      // 이 else 블록에 도달하는 경우는 아닐 것으로 예상됩니다.
-      global.debugLog(`Room option with id ${id} not updated (no changes or not found by update method).`);
-      res.status(404).json({ message: 'Room option not found' });
+      res.status(201).json(createdRoomOptionWithRoom);
     }
   } catch (error) {
+    global.debugLog(`Error updating/creating room option: ${error.message}`);
     res.status(500).json({ error: error.message });
   }
 };
