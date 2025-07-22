@@ -98,7 +98,15 @@
           <v-container>
             <v-row>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="editedItem.room_id" label="호실 ID" type="number"></v-text-field>
+                <v-select
+                  v-model="editedItem.room_id"
+                  :items="rooms"
+                  item-title="room_number"
+                  item-value="id"
+                  label="호실 선택"
+                  :rules="[v => !!v || '호실은 필수입니다.']"
+                  required
+                ></v-select>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-checkbox v-model="editedItem.refrigerator" label="냉장고"></v-checkbox>
@@ -231,9 +239,36 @@ const fetchRoomOptions = async () => {
   }
 };
 
+// 새로 추가: 호실 목록을 저장할 ref
+const rooms = ref([]);
+
+// 새로 추가: 호실 목록을 가져오는 함수
+const fetchRooms = async () => {
+  try {
+    const response = await apiClient.get('/rooms'); // /api/rooms 엔드포인트 사용
+    // 중복된 room_id를 가진 객체 제거
+    const uniqueRooms = [];
+    const roomIds = new Set();
+    response.data.forEach(room => {
+      if (!roomIds.has(room.id)) {
+        uniqueRooms.push(room);
+        roomIds.add(room.id);
+      }
+    });
+    rooms.value = uniqueRooms;
+  } catch (error) {
+    console.error('Error fetching rooms:', error);
+  }
+};
+
 const openDialog = (item) => {
   editedIndex.value = item ? roomOptions.value.findIndex(option => option.id === item.id) : -1;
   editedItem.value = item ? { ...item } : { ...defaultItem };
+
+  // 추가된 로그
+  console.log('editedItem.room_id:', editedItem.value.room_id, 'Type:', typeof editedItem.value.room_id);
+  console.log('Rooms array:', rooms.value);
+
   // Convert boolean values from backend to be compatible with v-checkbox
   for (const key in editedItem.value) {
     if (typeof editedItem.value[key] === 'number') {
@@ -261,6 +296,7 @@ const saveItem = async () => {
 
     if (editedIndex.value > -1) {
       // Update item
+      console.log('itemToSave.id:', itemToSave.id);
       await apiClient.put(`/room-options/${itemToSave.id}`, itemToSave);
     } else {
       // Create new item
@@ -270,12 +306,24 @@ const saveItem = async () => {
     fetchRoomOptions(); // Refresh list
     showSnackbar('저장되었습니다.', 'success');
   } catch (error) {
-    console.error('Error saving room option:', error);
-    showSnackbar('저장 중 오류가 발생했습니다.', 'error');
+    console.error('Error saving room option:', error.response ? error.response.data : error.message);
+    let errorMessage = '저장 중 오류가 발생했습니다.';
+    if (error.response && error.response.data) {
+      if (error.response.data.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response.data.errors) {
+        // errors가 배열일 경우 첫 번째 에러 메시지를 사용하거나 모두 표시
+        errorMessage = Array.isArray(error.response.data.errors)
+          ? error.response.data.errors.join(', ')
+          : error.response.data.errors;
+      }
+    }
+    showSnackbar(errorMessage, 'error');
   }
 };
 
 const editItem = (item) => {
+  console.log('Editing item:', item);
   openDialog(item);
 };
 
@@ -340,5 +388,8 @@ const showSnackbar = (message, color) => {
   snackbar.value.show = true;
 };
 
-onMounted(fetchRoomOptions);
-</script> 
+onMounted(() => {
+  fetchRoomOptions();
+  fetchRooms(); // 호실 목록 가져오기
+});
+</script>

@@ -4,19 +4,34 @@ const ExcelJS = require('exceljs'); // ExcelJS import
 const path = require('path');
 
 // 디버그 로그 함수 (index.js에서 가져오거나 여기서 간단히 정의)
-const debugLog = (...args) => {
-  // 실제 프로덕션에서는 index.js의 로거를 공유하는 것이 좋습니다.
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[DEBUG]', ...args);
-  }
-};
+// const debugLog = (...args) => {
+//   // 실제 프로덕션에서는 index.js의 로거를 공유하는 것이 좋습니다.
+//   if (process.env.NODE_ENV === 'development') {
+//     console.log('[DEBUG]', ...args);
+//   }
+// };
 
 // Create a new RoomOption
 exports.createRoomOption = async (req, res) => {
+  global.debugLog(`Creating new room option with body: ${JSON.stringify(req.body)}`);
   try {
     const roomOption = await RoomOption.create(req.body);
+    global.debugLog(`Successfully created room option: ${JSON.stringify(roomOption.toJSON())}`);
     res.status(201).json(roomOption);
   } catch (error) {
+    global.debugLog(`Error creating room option: ${error.message}`);
+    // Sequelize ValidationError의 경우 더 상세한 정보 제공
+    if (error.name === 'SequelizeValidationError') {
+      return res.status(400).json({
+        message: '유효성 검사 오류',
+        errors: error.errors ? error.errors.map(err => err.message) : error.message
+      });
+    } else if (error.name === 'SequelizeForeignKeyConstraintError') {
+      return res.status(400).json({
+        message: '존재하지 않는 호실 ID입니다.',
+        errors: error.message // 외래 키 제약 조건 위반 메시지 포함
+      });
+    }
     res.status(500).json({ error: error.message });
   }
 };
@@ -66,10 +81,19 @@ exports.getRoomOptionById = async (req, res) => {
 
 // Update a RoomOption
 exports.updateRoomOption = async (req, res) => {
-  debugLog(`Updating room option with id: ${req.params.id}`);
-  debugLog(`Request body: ${JSON.stringify(req.body)}`);
+  global.debugLog(`Updating room option with id: ${req.params.id}`);
+  global.debugLog(`Request body: ${JSON.stringify(req.body)}`);
   try {
     const { id } = req.params;
+
+    // 추가: 해당 ID의 RoomOption이 존재하는지 확인
+    const existingRoomOption = await RoomOption.findByPk(id);
+    if (!existingRoomOption) {
+      global.debugLog(`Room option with id ${id} not found before update attempt.`);
+      return res.status(404).json({ message: 'Room option not found' });
+    }
+    global.debugLog(`Found existing room option: ${JSON.stringify(existingRoomOption.toJSON())}`);
+
     const [updated] = await RoomOption.update(req.body, {
       where: { id: id }
     });
@@ -81,8 +105,13 @@ exports.updateRoomOption = async (req, res) => {
           attributes: ['id', 'room_number', 'building_id']
         }]
       });
+      global.debugLog(`Successfully updated room option: ${JSON.stringify(updatedRoomOption.toJSON())}`);
       res.status(200).json(updatedRoomOption);
     } else {
+      // 이 경우는 업데이트할 데이터가 기존과 동일하여 updated가 0일 수 있습니다.
+      // 하지만 프론트에서 'Room option not found' 에러를 받았으므로,
+      // 이 else 블록에 도달하는 경우는 아닐 것으로 예상됩니다.
+      global.debugLog(`Room option with id ${id} not updated (no changes or not found by update method).`);
       res.status(404).json({ message: 'Room option not found' });
     }
   } catch (error) {

@@ -26,7 +26,8 @@
     "multer": "^2.0.1",
     "node-cron": "^4.2.0",
     "sequelize": "^6.37.7",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",
