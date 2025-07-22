@@ -10,9 +10,12 @@ const storage = multer.diskStorage({
   }
 });
 
+const fileSizeLimit = process.env.MAX_FILE_SIZE ? parseInt(process.env.MAX_FILE_SIZE) : 50 * 1024 * 1024;
+console.log(`[DEBUG] Multer file size limit is set to: ${fileSizeLimit} bytes`);
+
 const upload = multer({
   storage: storage,
-  limits: { fileSize: process.env.MAX_FILE_SIZE ? parseInt(process.env.MAX_FILE_SIZE) : 50 * 1024 * 1024 }, // Default to 50MB
+  limits: { fileSize: fileSizeLimit }, // Default to 50MB
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|gif|pdf|xlsx|xls/;
     const mimetypes = [
