@@ -1,0 +1,1 @@
+docs: GEMINI.md 프로젝트 분석 및 최적화
