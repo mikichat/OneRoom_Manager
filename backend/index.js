@@ -2,9 +2,21 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cors = require('cors'); // cors 모듈 추가
+const fs = require('fs'); // fs 모듈 추가
 const app = express();
 const port = process.env.PORT || 3000;
 const morgan = require('morgan'); // morgan 모듈 추가
+
+// 로그 디렉토리 생성
+const logDirectory = path.join(__dirname, 'logs');
+if (!fs.existsSync(logDirectory)) {
+  fs.mkdirSync(logDirectory);
+}
+
+// 로그 스트림 생성
+const accessLogStream = fs.createWriteStream(path.join(logDirectory, 'access.log'), { flags: 'a' });
+const appLogStream = fs.createWriteStream(path.join(logDirectory, 'app.log'), { flags: 'a' });
+
 const config = require('./config/config.json')[process.env.NODE_ENV || 'development']; // 설정 파일 로드
 
 // 디버그 로깅 설정 확인
@@ -13,12 +25,16 @@ const isDebugLoggingEnabled = config.debugLogging || false;
 // 커스텀 로거 함수
 const debugLog = (...args) => {
   if (isDebugLoggingEnabled) {
-    console.log('[DEBUG]', ...args);
+    const message = args.map(arg => (typeof arg === 'object' ? JSON.stringify(arg) : arg)).join(' ');
+    const timestamp = new Date().toISOString();
+    appLogStream.write(`[${timestamp}] [DEBUG] ${message}\n`);
+    console.log('[DEBUG]', ...args); // 기존 콘솔 출력 유지
   }
 };
 
 if (isDebugLoggingEnabled) {
-  app.use(morgan('dev')); // 개발 환경에서만 HTTP 요청 로깅
+  app.use(morgan('combined', { stream: accessLogStream })); // HTTP 요청 로깅 파일에 저장
+  app.use(morgan('dev')); // 기존처럼 콘솔에도 표시
 }
 
 const authRoutes = require('./routes/authRoutes');
