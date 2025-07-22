@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
+    "dev": "rmdir /s /q logs && mkdir logs && nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "db:migrate": "node -r dotenv/config node_modules/sequelize-cli/lib/sequelize db:migrate",
     "db:seed": "node -r dotenv/config node_modules/sequelize-cli/lib/sequelize db:seed:all",
