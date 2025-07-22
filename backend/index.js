@@ -33,8 +33,15 @@ const debugLog = (...args) => {
 };
 
 if (isDebugLoggingEnabled) {
-  app.use(morgan('combined', { stream: accessLogStream })); // HTTP 요청 로깅 파일에 저장
-  app.use(morgan('dev')); // 기존처럼 콘솔에도 표시
+  // Morgan 토큰 정의: 요청 헤더 및 쿼리를 JSON 문자열로 반환
+  morgan.token('req-headers', (req, res) => JSON.stringify(req.headers));
+  morgan.token('req-query', (req, res) => JSON.stringify(req.query));
+  
+  // 새로운 포맷 정의
+  const morganFormat = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" \nQuery: :req-query \nHeaders: :req-headers';
+
+  app.use(morgan(morganFormat, { stream: accessLogStream })); // 파일에 자세한 로그 저장
+  app.use(morgan('dev')); // 콘솔에는 기존처럼 표시
 }
 
 const authRoutes = require('./routes/authRoutes');

@@ -1,1 +1,1 @@
-feat: 백엔드 로그 파일 저장 기능 추가
+feat: access.log에 쿼리 정보 추가

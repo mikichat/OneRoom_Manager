@@ -3,6 +3,14 @@ const { Op } = Sequelize;
 const ExcelJS = require('exceljs'); // ExcelJS import
 const path = require('path');
 
+// 디버그 로그 함수 (index.js에서 가져오거나 여기서 간단히 정의)
+const debugLog = (...args) => {
+  // 실제 프로덕션에서는 index.js의 로거를 공유하는 것이 좋습니다.
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[DEBUG]', ...args);
+  }
+};
+
 // Create a new RoomOption
 exports.createRoomOption = async (req, res) => {
   try {
@@ -58,6 +66,8 @@ exports.getRoomOptionById = async (req, res) => {
 
 // Update a RoomOption
 exports.updateRoomOption = async (req, res) => {
+  debugLog(`Updating room option with id: ${req.params.id}`);
+  debugLog(`Request body: ${JSON.stringify(req.body)}`);
   try {
     const { id } = req.params;
     const [updated] = await RoomOption.update(req.body, {
