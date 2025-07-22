@@ -1,5 +1,10 @@
 @echo off
 
+echo Creating logs directory if it does not exist...
+cd backend
+mkdir logs >nul 2>nul
+cd ..
+
 echo Starting backend...
 cd backend
 call npm install
