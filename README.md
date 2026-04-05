@@ -10,12 +10,15 @@
 - **Database**: SQLite3 (빠른 개발 및 배포)
 - **ORM**: Sequelize (Node.js)
 - **Authentication**: JWT 기반 인증
+- **Validation**: express-validator
+- **Testing**: Jest
 
 ### Frontend
 - **Framework**: Vue.js 3 + Vuetify
 - **State Management**: Vuex (Vue)
 - **Build Tool**: Vite
 - **Charting**: Chart.js, Vue-Chartjs
+- **Testing**: Vitest
 
 ### 확장 서비스
 - **SMS 서비스**: 네이버 클라우드 플랫폼 SENS 또는 KT SMS API
@@ -439,6 +442,7 @@ chore: 빌드 과정 또는 보조 기능 수정
 - 이미지 lazy loading
 - 컴포넌트 code splitting
 - 캐싱 전략 구현
+- 재사용 가능한 컴포저블 (useFormatters, useSnackbar, useDebounce)
 
 ## 🔒 보안 고려사항
 
@@ -450,7 +454,9 @@ chore: 빌드 과정 또는 보조 기능 수정
 ### 접근 제어
 - JWT 토큰 기반 인증
 - 역할 기반 접근 제어 (Admin/User)
-- API rate limiting
+- API rate limiting (일반 API: 100회/15분, 인증 API: 10회/15분)
+- 전역 에러 핸들러 미들웨어
+- 요청 검증 미들웨어 (express-validator)
 
 ## 🧪 테스트 계획
 
@@ -464,9 +470,15 @@ chore: 빌드 과정 또는 보조 기능 수정
 - 알림 서비스 테스트
 - 파일 업로드 테스트
 
+### 테스트 환경
+- **백엔드**: Jest (`npm test`)
+- **프론트엔드**: Vitest (`npm test`)
+
 ## 📈 모니터링 및 로깅
 
 ### 로그 관리
+- Winston 로거 (파일 + 콘솔)
+- Morgan HTTP 요청 로깅
 - 에러 로그 수집
 - 사용자 액션 로그
 - 성능 모니터링
@@ -527,12 +539,14 @@ pm2 start ecosystem.config.js
 CORS 설정 명시
 HTTPS 설정 가이드
 보안 헤더 설정 (helmet.js 사용)
-입력 데이터 검증 전략 (joi, express-validator 등)
+입력 데이터 검증 전략 (express-validator 적용)
+Rate limiting 적용
+전역 에러 핸들러 적용
 
 5. 모니터링 도구
 
-Winston 로깅 라이브러리 추가
-morgan HTTP 요청 로깅
+Winston 로깅 라이브러리 적용
+morgan HTTP 요청 로깅 적용
 helmet 보안 헤더 설정
 
 6. 추가 환경 변수
@@ -550,26 +564,37 @@ RATE_LIMIT_MAX=100
 # Session
 SESSION_SECRET=your-session-secret
 JWT_EXPIRES_IN=24h
-7. 스크립트 추가
-json{
+7. 스크립트 추가 (백엔드)
+```json
+{
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js",
-    "build": "npm run build:frontend",
-    "build:frontend": "cd frontend && npm run build",
+    "start": "node index.js",
+    "dev": "rmdir /s /q logs && mkdir logs && nodemon index.js",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "db:migrate": "sequelize-cli db:migrate",
-    "db:seed": "npx sequelize-cli db:seed:all",
-    "db:migrate:undo:all": "npx sequelize-cli db:migrate:undo:all",
+    "db:seed": "sequelize-cli db:seed:all",
+    "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all",
     "db:reset": "npm run db:migrate:undo:all && npm run db:migrate && npm run db:seed"
   }
 }
+```
+
+프론트엔드 스크립트:
+```json
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest"
+  }
+}
+```
 8. 예외 처리 및 에러 관리
 
-글로벌 에러 핸들러 구현
+전역 에러 핸들러 미들웨어 적용 (errorHandler.js)
+AppError 클래스 적용
+asyncHandler 헬퍼 함수 적용
 사용자 친화적 에러 메시지 정의
 API 에러 응답 표준화
 
@@ -581,9 +606,9 @@ CDN 연동 방안
 
 10. 문서화 개선
 
-API 문서화 (Swagger/OpenAPI 3.0)
-데이터베이스 ERD 다이어그램
-아키텍처 다이어그램
+API 문서화 (Swagger/OpenAPI 3.0) - 계획됨
+데이터베이스 ERD 다이어그램 - 계획됨
+아키텍처 다이어그램 - 계획됨
 
 ---
 
