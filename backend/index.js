@@ -64,6 +64,22 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const roomOptionRoutes = require('./routes/roomOptionRoutes');
 const seedRoutes = require('./routes/seedRoutes');
+const { errorHandler } = require('./middlewares/errorHandler');
+const rateLimit = require('express-rate-limit');
+
+// Rate limiting - general API
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: { error: 'Too many requests, please try again later.' },
+});
+
+// Rate limiting - auth routes (stricter)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // limit each IP to 10 requests per windowMs
+  message: { error: 'Too many authentication attempts, please try again later.' },
+});
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -74,7 +90,8 @@ app.get('/', (req, res) => {
   res.send('Hello, OneRoom Manager!');
 });
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api', apiLimiter);
 app.use('/api/buildings', buildingRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/tenants', tenantRoutes);
@@ -85,6 +102,9 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/room-options', roomOptionRoutes);
 app.use('/api', seedRoutes);
+
+// Global error handler
+app.use(errorHandler);
 
 const setupCronJobs = require('./cronJobs');
 

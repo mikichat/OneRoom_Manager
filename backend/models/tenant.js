@@ -2,7 +2,7 @@
 const {
   Model
 } = require('sequelize');
-const { encrypt, decrypt } = require('../utils/encryption'); // cryptoUtils import
+const { encrypt, decrypt } = require('../utils/crypto');
 
 module.exports = (sequelize, DataTypes) => {
   class Tenant extends Model {

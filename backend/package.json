@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "rmdir /s /q logs && mkdir logs && nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "db:migrate": "node -r dotenv/config node_modules/sequelize-cli/lib/sequelize db:migrate",
     "db:seed": "node -r dotenv/config node_modules/sequelize-cli/lib/sequelize db:seed:all",
     "db:migrate:undo:all": "node -r dotenv/config node_modules/sequelize-cli/lib/sequelize db:migrate:undo:all",
@@ -22,7 +22,10 @@
     "dotenv": "^17.2.0",
     "exceljs": "^4.4.0",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.3.2",
+    "express-validator": "^7.3.2",
     "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
     "multer": "^2.0.1",
     "node-cron": "^4.2.0",
     "sequelize": "^6.37.7",
@@ -30,7 +33,10 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.3.0",
     "nodemon": "^3.1.10",
-    "sequelize-cli": "^6.6.3"
+    "sequelize-cli": "^6.6.3",
+    "supertest": "^7.2.2"
   }
 }

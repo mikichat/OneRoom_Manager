@@ -1,5 +1,5 @@
 'use strict';
-const { encrypt } = require('../utils/encryption'); // 암호화 함수 import
+const { encrypt } = require('../utils/crypto');
 const db = require('../models'); // db 객체 import
 
 module.exports = {
